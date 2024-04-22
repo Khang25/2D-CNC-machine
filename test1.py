@@ -4,7 +4,7 @@ import serial
 import serial.tools.list_ports
 from datetime import datetime
 
-
+#Tao Sua xong roi` commit kieu Vay ne
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
