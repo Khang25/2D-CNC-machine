@@ -4,7 +4,6 @@ import serial
 import serial.tools.list_ports
 from datetime import datetime
 
-#Tao Sua xong roi` commit kieu Vay ne
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -13,7 +12,7 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
-        self.tabWidget.setGeometry(QtCore.QRect(0, 0, 1011, 741))
+        self.tabWidget.setGeometry(QtCore.QRect(0, 0, 1021, 741))
         self.tabWidget.setObjectName("tabWidget")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
@@ -26,6 +25,12 @@ class Ui_MainWindow(object):
         font.setPointSize(9)
         self.Baudrate_comboBox.setFont(font)
         self.Baudrate_comboBox.setObjectName("Baudrate_comboBox")
+        self.Baudrate_comboBox.addItem("")
+        self.Baudrate_comboBox.addItem("")
+        self.Baudrate_comboBox.addItem("")
+        self.Baudrate_comboBox.addItem("")
+        self.Baudrate_comboBox.addItem("")
+        self.Baudrate_comboBox.addItem("")
         self.Baudrate_comboBox.addItem("")
         self.Baudrate_comboBox.addItem("")
         self.label = QtWidgets.QLabel(self.tab)
@@ -71,7 +76,7 @@ class Ui_MainWindow(object):
         self.tableView.setGeometry(QtCore.QRect(5, 5, 241, 150))
         self.tableView.setObjectName("tableView")
         self.tableView_2 = QtWidgets.QTableView(self.tab)
-        self.tableView_2.setGeometry(QtCore.QRect(250, 5, 741, 426))
+        self.tableView_2.setGeometry(QtCore.QRect(250, 5, 761, 426))
         self.tableView_2.setObjectName("tableView_2")
         self.label_4 = QtWidgets.QLabel(self.tab)
         self.label_4.setGeometry(QtCore.QRect(280, 240, 71, 21))
@@ -202,24 +207,28 @@ class Ui_MainWindow(object):
         self.XHome_pushButton = QtWidgets.QPushButton(self.tab)
         self.XHome_pushButton.setGeometry(QtCore.QRect(430, 45, 71, 31))
         font = QtGui.QFont()
+        font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.XHome_pushButton.setFont(font)
         self.XHome_pushButton.setObjectName("XHome_pushButton")
         self.YHome_pushButton = QtWidgets.QPushButton(self.tab)
         self.YHome_pushButton.setGeometry(QtCore.QRect(430, 95, 71, 31))
         font = QtGui.QFont()
+        font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.YHome_pushButton.setFont(font)
         self.YHome_pushButton.setObjectName("YHome_pushButton")
         self.ZHome_pushButton = QtWidgets.QPushButton(self.tab)
         self.ZHome_pushButton.setGeometry(QtCore.QRect(430, 145, 71, 31))
         font = QtGui.QFont()
+        font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.ZHome_pushButton.setFont(font)
         self.ZHome_pushButton.setObjectName("ZHome_pushButton")
         self.AllHome_pushButton = QtWidgets.QPushButton(self.tab)
         self.AllHome_pushButton.setGeometry(QtCore.QRect(430, 190, 71, 31))
         font = QtGui.QFont()
+        font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.AllHome_pushButton.setFont(font)
         self.AllHome_pushButton.setObjectName("AllHome_pushButton")
@@ -243,18 +252,21 @@ class Ui_MainWindow(object):
         self.Load_pushButton = QtWidgets.QPushButton(self.tab)
         self.Load_pushButton.setGeometry(QtCore.QRect(520, 110, 93, 28))
         font = QtGui.QFont()
+        font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.Load_pushButton.setFont(font)
         self.Load_pushButton.setObjectName("Load_pushButton")
         self.Delete_pushButton = QtWidgets.QPushButton(self.tab)
         self.Delete_pushButton.setGeometry(QtCore.QRect(620, 110, 93, 28))
         font = QtGui.QFont()
+        font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.Delete_pushButton.setFont(font)
         self.Delete_pushButton.setObjectName("Delete_pushButton")
         self.Browse_pushButton = QtWidgets.QPushButton(self.tab)
         self.Browse_pushButton.setGeometry(QtCore.QRect(720, 110, 93, 28))
         font = QtGui.QFont()
+        font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.Browse_pushButton.setFont(font)
         self.Browse_pushButton.setObjectName("Browse_pushButton")
@@ -286,43 +298,44 @@ class Ui_MainWindow(object):
         self.Send_pushButton = QtWidgets.QPushButton(self.tab)
         self.Send_pushButton.setGeometry(QtCore.QRect(720, 180, 93, 28))
         font = QtGui.QFont()
-        font.setFamily("MS Shell Dlg 2")
+        font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.Send_pushButton.setFont(font)
         self.Send_pushButton.setObjectName("Send_pushButton")
         self.XCalibrate_pushButton = QtWidgets.QPushButton(self.tab)
-        self.XCalibrate_pushButton.setGeometry(QtCore.QRect(20, 210, 93, 28))
+        self.XCalibrate_pushButton.setGeometry(QtCore.QRect(20, 190, 93, 28))
         self.XCalibrate_pushButton.setObjectName("XCalibrate_pushButton")
         self.YCalibrate_pushButton = QtWidgets.QPushButton(self.tab)
-        self.YCalibrate_pushButton.setGeometry(QtCore.QRect(20, 250, 93, 28))
+        self.YCalibrate_pushButton.setGeometry(QtCore.QRect(20, 230, 93, 28))
         self.YCalibrate_pushButton.setObjectName("YCalibrate_pushButton")
         self.ZCalibrate_pushButton = QtWidgets.QPushButton(self.tab)
-        self.ZCalibrate_pushButton.setGeometry(QtCore.QRect(20, 290, 93, 28))
+        self.ZCalibrate_pushButton.setGeometry(QtCore.QRect(20, 270, 93, 28))
         self.ZCalibrate_pushButton.setObjectName("ZCalibrate_pushButton")
         self.Move_pushButton = QtWidgets.QPushButton(self.tab)
         self.Move_pushButton.setGeometry(QtCore.QRect(343, 190, 71, 31))
         self.Move_pushButton.clicked.connect(self.move_command)
         font = QtGui.QFont()
+        font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.Move_pushButton.setFont(font)
         self.Move_pushButton.setObjectName("Move_pushButton")
         self.XEnabled_pushButton = QtWidgets.QPushButton(self.tab)
-        self.XEnabled_pushButton.setGeometry(QtCore.QRect(140, 210, 93, 28))
+        self.XEnabled_pushButton.setGeometry(QtCore.QRect(130, 190, 93, 28))
         self.XEnabled_pushButton.setObjectName("XEnabled_pushButton")
         self.YEnabled_pushButton = QtWidgets.QPushButton(self.tab)
-        self.YEnabled_pushButton.setGeometry(QtCore.QRect(140, 250, 93, 28))
+        self.YEnabled_pushButton.setGeometry(QtCore.QRect(130, 230, 93, 28))
         self.YEnabled_pushButton.setObjectName("YEnabled_pushButton")
         self.ZEnabled_pushButton = QtWidgets.QPushButton(self.tab)
-        self.ZEnabled_pushButton.setGeometry(QtCore.QRect(140, 290, 93, 28))
+        self.ZEnabled_pushButton.setGeometry(QtCore.QRect(130, 270, 93, 28))
         self.ZEnabled_pushButton.setObjectName("ZEnabled_pushButton")
         self.textBrowser_2 = QtWidgets.QTextBrowser(self.tab)
         self.textBrowser_2.setGeometry(QtCore.QRect(5, 440, 581, 261))
         self.textBrowser_2.setObjectName("textBrowser_2")
         self.AllCalibrate_pushButton = QtWidgets.QPushButton(self.tab)
-        self.AllCalibrate_pushButton.setGeometry(QtCore.QRect(20, 330, 93, 28))
+        self.AllCalibrate_pushButton.setGeometry(QtCore.QRect(20, 310, 93, 28))
         self.AllCalibrate_pushButton.setObjectName("AllCalibrate_pushButton")
         self.AllEnabled_pushButton = QtWidgets.QPushButton(self.tab)
-        self.AllEnabled_pushButton.setGeometry(QtCore.QRect(140, 330, 93, 28))
+        self.AllEnabled_pushButton.setGeometry(QtCore.QRect(130, 310, 93, 28))
         self.AllEnabled_pushButton.setObjectName("AllEnabled_pushButton")
         self.label_9 = QtWidgets.QLabel(self.tab)
         self.label_9.setGeometry(QtCore.QRect(10, 450, 55, 16))
@@ -339,23 +352,24 @@ class Ui_MainWindow(object):
         self.ClearMessage_pushButton = QtWidgets.QPushButton(self.tab)
         self.ClearMessage_pushButton.setGeometry(QtCore.QRect(460, 450, 121, 28))
         font = QtGui.QFont()
+        font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.ClearMessage_pushButton.setFont(font)
         self.ClearMessage_pushButton.setObjectName("ClearMessage_pushButton")
         self.ClearMessage_pushButton.clicked.connect(self.clear_messages)
         self.listView = QtWidgets.QListView(self.tab)
-        self.listView.setGeometry(QtCore.QRect(590, 440, 401, 261))
+        self.listView.setGeometry(QtCore.QRect(590, 440, 421, 261))
         self.listView.setObjectName("listView")
         self.Gcode_tableWidget = QtWidgets.QTableWidget(self.tab)
-        self.Gcode_tableWidget.setGeometry(QtCore.QRect(600, 450, 381, 241))
+        self.Gcode_tableWidget.setGeometry(QtCore.QRect(600, 450, 401, 241))
         self.Gcode_tableWidget.setObjectName("Gcode_tableWidget")
         self.Gcode_tableWidget.setColumnCount(3)
         self.Gcode_tableWidget.setRowCount(0)
-        # Insert a new row
-        row_count = self.Gcode_tableWidget.rowCount()
-        self.Gcode_tableWidget.insertRow(row_count)
-
         item = QtWidgets.QTableWidgetItem()
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(9)
+        item.setFont(font)
         self.Gcode_tableWidget.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
         self.Gcode_tableWidget.setHorizontalHeaderItem(1, item)
@@ -463,6 +477,64 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         self.Save_pushButton.setFont(font)
         self.Save_pushButton.setObjectName("Save_pushButton")
+        self.label_20 = QtWidgets.QLabel(self.tab)
+        self.label_20.setGeometry(QtCore.QRect(20, 340, 55, 16))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(9)
+        self.label_20.setFont(font)
+        self.label_20.setObjectName("label_20")
+        self.label_21 = QtWidgets.QLabel(self.tab)
+        self.label_21.setGeometry(QtCore.QRect(20, 380, 81, 16))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(9)
+        self.label_21.setFont(font)
+        self.label_21.setObjectName("label_21")
+        self.Speed_horizontalSlider = QtWidgets.QSlider(self.tab)
+        self.Speed_horizontalSlider.setGeometry(QtCore.QRect(20, 360, 140, 22))
+        self.Speed_horizontalSlider.setMinimum(1)
+        self.Speed_horizontalSlider.setMaximum(5)
+        self.Speed_horizontalSlider.setSingleStep(1)
+        self.Speed_horizontalSlider.setPageStep(5)
+        self.Speed_horizontalSlider.setProperty("value", 1)
+        self.Speed_horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.Speed_horizontalSlider.setObjectName("Speed_horizontalSlider")
+        self.Speed_horizontalSlider.sliderReleased.connect(self.update_speed_label)
+        self.Speed_horizontalSlider.sliderReleased.connect(self.update_speed_label1)
+        self.Acceleration_horizontalSlider = QtWidgets.QSlider(self.tab)
+        self.Acceleration_horizontalSlider.setGeometry(QtCore.QRect(20, 400, 140, 22))
+        self.Acceleration_horizontalSlider.setMinimum(1)
+        self.Acceleration_horizontalSlider.setMaximum(5)
+        self.Acceleration_horizontalSlider.setPageStep(1)
+        self.Acceleration_horizontalSlider.setProperty("value", 1)
+        self.Acceleration_horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.Acceleration_horizontalSlider.setObjectName("Acceleration_horizontalSlider")
+        self.Acceleration_horizontalSlider.sliderReleased.connect(self.update_accel_label)
+        self.Acceleration_horizontalSlider.sliderReleased.connect(self.update_accel_label1)
+        self.label_22 = QtWidgets.QLabel(self.tab)
+        self.label_22.setGeometry(QtCore.QRect(170, 360, 70, 20))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(9)
+        self.label_22.setFont(font)
+        self.label_22.setObjectName("label_22")
+        self.label_23 = QtWidgets.QLabel(self.tab)
+        self.label_23.setGeometry(QtCore.QRect(170, 400, 70, 20))
+        self.label_23.setObjectName("label_23")
+        self.Hold_pushButton = QtWidgets.QPushButton(self.tab)
+        self.Hold_pushButton.setGeometry(QtCore.QRect(260, 190, 71, 31))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(9)
+        self.Hold_pushButton.setFont(font)
+        self.Hold_pushButton.setObjectName("Hold_pushButton")
+        self.Start_pushButton = QtWidgets.QPushButton(self.tab)
+        self.Start_pushButton.setGeometry(QtCore.QRect(820, 60, 81, 71))
+        self.Start_pushButton.setObjectName("Start_pushButton")
+        self.Emergency_pushButton = QtWidgets.QPushButton(self.tab)
+        self.Emergency_pushButton.setGeometry(QtCore.QRect(820, 140, 121, 81))
+        self.Emergency_pushButton.setObjectName("Emergency_pushButton")
         self.tableView.raise_()
         self.COM_comboBox.raise_()
         self.Baudrate_comboBox.raise_()
@@ -532,6 +604,15 @@ class Ui_MainWindow(object):
         self.label_19.raise_()
         self.Offset_ComboBox.raise_()
         self.Save_pushButton.raise_()
+        self.label_20.raise_()
+        self.label_21.raise_()
+        self.Speed_horizontalSlider.raise_()
+        self.Acceleration_horizontalSlider.raise_()
+        self.label_22.raise_()
+        self.label_23.raise_()
+        self.Hold_pushButton.raise_()
+        self.Start_pushButton.raise_()
+        self.Emergency_pushButton.raise_()
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
@@ -572,7 +653,13 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "CNC Control V1"))
         self.Baudrate_comboBox.setItemText(0, _translate("MainWindow", "9600"))
-        self.Baudrate_comboBox.setItemText(1, _translate("MainWindow", "115200"))
+        self.Baudrate_comboBox.setItemText(1, _translate("MainWindow", "14400"))
+        self.Baudrate_comboBox.setItemText(2, _translate("MainWindow", "19200"))
+        self.Baudrate_comboBox.setItemText(3, _translate("MainWindow", "28800"))
+        self.Baudrate_comboBox.setItemText(4, _translate("MainWindow", "31250"))
+        self.Baudrate_comboBox.setItemText(5, _translate("MainWindow", "38400"))
+        self.Baudrate_comboBox.setItemText(6, _translate("MainWindow", "57600"))
+        self.Baudrate_comboBox.setItemText(7, _translate("MainWindow", "115200"))
         self.label.setText(_translate("MainWindow", "Serial Configuration"))
         self.label_2.setText(_translate("MainWindow", "COM:"))
         self.label_3.setText(_translate("MainWindow", "Baudrate:"))
@@ -630,6 +717,13 @@ class Ui_MainWindow(object):
         self.label_18.setText(_translate("MainWindow", "Z offset:"))
         self.label_19.setText(_translate("MainWindow", "Offset position"))
         self.Save_pushButton.setText(_translate("MainWindow", "Save"))
+        self.label_20.setText(_translate("MainWindow", "Speed:"))
+        self.label_21.setText(_translate("MainWindow", "Acceleration:"))
+        self.label_22.setText(_translate("MainWindow", "100, 100, 50"))
+        self.label_23.setText(_translate("MainWindow", "200, 200"))
+        self.Hold_pushButton.setText(_translate("MainWindow", "Hold"))
+        self.Start_pushButton.setText(_translate("MainWindow", "Start"))
+        self.Emergency_pushButton.setText(_translate("MainWindow", "Emergency Stop"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Interface"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "View"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Settings"))
@@ -697,29 +791,130 @@ class Ui_MainWindow(object):
 
     def move_command(self):
         # Get the values from the lineEdits
-        x_coord = self.X_lineEdit.text()
-        y_coord = self.Y_lineEdit.text()
-        z_coord = self.Z_lineEdit.text()
-
+        x_coord = self.X_lineEdit.text() or "0"
+        y_coord = self.Y_lineEdit.text() or "0"
+        z_coord = self.Z_lineEdit.text() or "0"
         # Generate the G-code command
-        gcode_command = f"G01 X{x_coord} Y{y_coord}"
-
-        # Send the G-code command to Arduino (you need to implement this part)
+        gcode_command_parts = []
+        if x_coord:
+            gcode_command_parts.append(f"X{x_coord}")
+        if y_coord:
+            gcode_command_parts.append(f"Y{y_coord}")
+        if z_coord:
+            gcode_command_parts.append(f"Z{z_coord}")
+        gcode_command = "G0 " + " ".join(gcode_command_parts)
+        # Send the G-code command to Arduino 
         self.send_to_arduino(gcode_command)
 
     def send_to_arduino(self, gcode_command):
         if hasattr(self, 'ser') and self.ser.is_open:
             try:
-                self.ser.write(gcode_command.encode('utf-8') + b'\n')  # Send the command to Arduino
+                self.ser.write((gcode_command + '\n').encode('ascii'))  # Send the command to Arduino using ASCII encoding
                 current_time = datetime.now().strftime('%H:%M:%S')
                 self.Status_textBrowser.append(f"[{current_time}] Sent: {gcode_command}")
             except Exception as e:
                 self.Status_textBrowser.append(f"Error sending command: {e}")
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
-
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
 
+
+    def update_speed_label(self):
+        slider_value = self.Speed_horizontalSlider.value()  # Get the current slider value
+        speeds = {
+            1: (100, 100, 50),
+            2: (125, 125, 50),
+            3: (150, 150, 50),
+            4: (175, 175, 50),
+            5: (200, 200, 50)
+        }
+        x_speed, y_speed, z_speed = speeds.get(slider_value, (100, 100, 50))  # Default 
+        current_time = datetime.now().strftime('%H:%M:%S')
+        self.label_22.setText(f"{x_speed}, {y_speed}, {z_speed}")
+        self.Status_textBrowser.append(f"[{current_time}] Speed set at {x_speed}, {y_speed}, {z_speed} (mm/min)")
+
+
+    def update_speed_label1(self):
+        slider_value = self.Speed_horizontalSlider.value()  # Get the current slider value
+        speed_commands = {
+            1: "S1",
+            2: "S2",
+            3: "S3",
+            4: "S4",
+            5: "S5"
+        }
+        speed_command = speed_commands.get(slider_value, "S1")  # Default to SS1 if value not found
+        self.send_speed_to_arduino(speed_command)
+
+
+    def send_speed_to_arduino(self, speed_command):
+        if hasattr(self, 'ser') and self.ser.is_open:
+            try:
+                self.ser.write(f"{speed_command}\n".encode())  # Convert to bytes and send
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] Sent speed command: {speed_command}")
+            except Exception as e:
+                self.Status_textBrowser.append(f"Error sending speed command: {e}")
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+
+    def update_accel_label(self):
+        slider_value = self.Acceleration_horizontalSlider.value()  # Get the current slider value
+        accel = {
+            1: (200, 200),
+            2: (250, 250),
+            3: (300, 300),
+            4: (350, 350),
+            5: (400, 400)
+        }
+        x_accel, y_accel = accel.get(slider_value, (200, 200))  # Default 
+
+        self.label_23.setText(f"{x_accel}, {y_accel}")
+        self.Status_textBrowser.append(f"Acceleration set at {x_accel}, {y_accel}  (mm/min^2)")
+
+    def update_accel_label1(self):
+        slider_value = self.Acceleration_horizontalSlider.value()  # Get the current slider value
+        accel_commands = {
+            1: "A1",
+            2: "A2",
+            3: "A3",
+            4: "A4",
+            5: "A5"
+        }
+    
+        accel_command = accel_commands.get(slider_value, "A1")  # Default to SA1 if value not found
+        self.send_accel_to_arduino(accel_command)
+
+
+    def send_accel_to_arduino(self, accel_command):
+        if hasattr(self, 'ser') and self.ser.is_open:
+            try:
+                self.ser.write(f"{accel_command}\n".encode())  # Convert to bytes and send
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] Sent acceleration command: {accel_command}")
+            except Exception as e:
+                self.Status_textBrowser.append(f"Error sending acceleration command: {e}")
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+
+    # G - code Implimentation
+    def add_to_gcode_table(self, gcode_command):
+
+        row_count = self.Gcode_tableWidget.rowCount()
+        self.Gcode_tableWidget.insertRow(row_count)
+        if gcode_command.split(' ')[0].upper() in ["G0", "G1", "G2", "G3", "G4", "G10L2", "G10L20", "G28", "G30", 
+                                                "G28.1", "G30.1", "G53", "G92", "G92.1", "G38.2", "G38.3", 
+                                                "G38.4", "G38.5", "G80", "G93", "G94", "G20", "G21", "G90", 
+                                                "G91", "G91.1", "G17", "G18", "G19", "G43.1", "G49", "G40", 
+                                                "G54", "G55", "G56", "G57", "G58", "G59", "G61"]:
+            status = "Sent"
+        else:
+            status = "Not send"
+        self.Gcode_tableWidget.setItem(row_count, 0, QtWidgets.QTableWidgetItem(status))
+        self.Gcode_tableWidget.setItem(row_count, 1, QtWidgets.QTableWidgetItem(str(row_count + 1)))
+        self.Gcode_tableWidget.setItem(row_count, 2, QtWidgets.QTableWidgetItem(gcode_command))
 
 if __name__ == "__main__":
     import sys
