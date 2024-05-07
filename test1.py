@@ -1,22 +1,15 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem
 import serial
 import serial.tools.list_ports
 from datetime import datetime
-import threading
-import time
 
-M_CurrentPos = [0.0,0.0,0.0]
-Machine_Max_UpperLim = [205,190,60]
-Machine_Max_LowerLim= [-205,-190,-60]
-M_HomePos = [0,0,0]
 
 OnlyFloat = QtGui.QDoubleValidator(
                 -9999.0, # bottom
                 9999.0, # top
                 1, # decimals 
                 notation=QtGui.QDoubleValidator.StandardNotation)
-M_Pose = [0.00,0.00,0.00]
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -26,6 +19,9 @@ class Ui_MainWindow(object):
         self.AdjustFlag = 0
         self.Move_Flag = 0
         self.M_CurrentPos = [0.0, 0.0, 0.0]
+        self.Machine_Max_UpperLim = [205,190,60]
+        self.Machine_Max_LowerLim= [-205,-190,-60]
+        self.M_HomePos = [0,0,0]
         #--------------# config widget 
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1029, 781)
@@ -168,7 +164,6 @@ class Ui_MainWindow(object):
         font.setPointSize(9)
         self.groupBox.setFont(font)
         self.groupBox.setObjectName("groupBox")
-        self.disable_move_buttons()
         self.Hundred_radioButton = QtWidgets.QRadioButton(self.groupBox)
         self.Hundred_radioButton.setGeometry(QtCore.QRect(10, 20, 51, 20))
         self.Hundred_radioButton.setObjectName("Hundred_radioButton")
@@ -181,14 +176,11 @@ class Ui_MainWindow(object):
         self.DotOne_radioButton = QtWidgets.QRadioButton(self.groupBox)
         self.DotOne_radioButton.setGeometry(QtCore.QRect(10, 110, 51, 20))
         self.DotOne_radioButton.setObjectName("DotOne_radioButton")
-        self.Hundred_radioButton.toggled.connect(self.check_radio_buttons)
-        self.Ten_radioButton.toggled.connect(self.check_radio_buttons)
-        self.One_radioButton.toggled.connect(self.check_radio_buttons)
-        self.DotOne_radioButton.toggled.connect(self.check_radio_buttons)
         self.Hundred_radioButton.setEnabled(False)
         self.Ten_radioButton.setEnabled(False)
         self.One_radioButton.setEnabled(False)
-        self.DotOne_radioButton.setEnabled(False)               
+        self.DotOne_radioButton.setEnabled(False)
+                  
         self.line = QtWidgets.QFrame(self.tab)
         self.line.setGeometry(QtCore.QRect(500, 20, 20, 201))
         self.line.setFrameShape(QtWidgets.QFrame.VLine)
@@ -228,17 +220,17 @@ class Ui_MainWindow(object):
         self.X_lineEdit.setGeometry(QtCore.QRect(300, 50, 113, 22))
         self.X_lineEdit.setObjectName("X_lineEdit")
         self.X_lineEdit.setValidator(OnlyFloat)
-        self.X_lineEdit.setText(f"{M_Pose[0]:.2f}")
+        self.X_lineEdit.setText(f"{self.M_CurrentPos[0]:.1f}")
         self.Y_lineEdit = QtWidgets.QLineEdit(self.tab)
         self.Y_lineEdit.setGeometry(QtCore.QRect(300, 100, 113, 22))
         self.Y_lineEdit.setObjectName("Y_lineEdit")
         self.Y_lineEdit.setValidator(OnlyFloat)
-        self.Y_lineEdit.setText(f"{M_Pose[1]:.2f}")
+        self.Y_lineEdit.setText(f"{self.M_CurrentPos[1]:.1f}")
         self.Z_lineEdit = QtWidgets.QLineEdit(self.tab)
         self.Z_lineEdit.setGeometry(QtCore.QRect(300, 150, 113, 22))
         self.Z_lineEdit.setObjectName("Z_lineEdit")
         self.Z_lineEdit.setValidator(OnlyFloat)
-        self.Z_lineEdit.setText(f"{M_Pose[2]:.2f}")
+        self.Z_lineEdit.setText(f"{self.M_CurrentPos[2]:.1f}")
         self.XHome_pushButton = QtWidgets.QPushButton(self.tab)
         self.XHome_pushButton.setGeometry(QtCore.QRect(430, 45, 71, 31))
         font = QtGui.QFont()
@@ -448,41 +440,15 @@ class Ui_MainWindow(object):
         self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
         self.line_3.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_3.setObjectName("line_3")
-        self.label_16 = QtWidgets.QLabel(self.tab)
-        self.label_16.setGeometry(QtCore.QRect(720, 278, 61, 16))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(9)
-        self.label_16.setFont(font)
-        self.label_16.setObjectName("label_16")
-        self.XOffset_doubleSpinBox = QtWidgets.QDoubleSpinBox(self.tab)
-        self.XOffset_doubleSpinBox.setGeometry(QtCore.QRect(790, 276, 62, 22))
-        self.XOffset_doubleSpinBox.setMinimum(-1000.0)
-        self.XOffset_doubleSpinBox.setMaximum(1000.0)
-        self.XOffset_doubleSpinBox.setSingleStep(0.1)
-        self.XOffset_doubleSpinBox.setObjectName("XOffset_doubleSpinBox")
-        self.label_17 = QtWidgets.QLabel(self.tab)
-        self.label_17.setGeometry(QtCore.QRect(720, 320, 61, 16))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(9)
-        self.label_17.setFont(font)
-        self.label_17.setObjectName("label_17")
-        self.YOffset_doubleSpinBox = QtWidgets.QDoubleSpinBox(self.tab)
-        self.YOffset_doubleSpinBox.setGeometry(QtCore.QRect(790, 318, 62, 22))
-        self.YOffset_doubleSpinBox.setMinimum(-1000.0)
-        self.YOffset_doubleSpinBox.setMaximum(1000.0)
-        self.YOffset_doubleSpinBox.setSingleStep(0.1)
-        self.YOffset_doubleSpinBox.setObjectName("YOffset_doubleSpinBox")
         self.label_18 = QtWidgets.QLabel(self.tab)
-        self.label_18.setGeometry(QtCore.QRect(720, 360, 61, 16))
+        self.label_18.setGeometry(QtCore.QRect(720, 280, 61, 16))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.label_18.setFont(font)
         self.label_18.setObjectName("label_18")
         self.ZOffset_doubleSpinBox = QtWidgets.QDoubleSpinBox(self.tab)
-        self.ZOffset_doubleSpinBox.setGeometry(QtCore.QRect(790, 358, 62, 22))
+        self.ZOffset_doubleSpinBox.setGeometry(QtCore.QRect(780, 277, 62, 22))
         self.ZOffset_doubleSpinBox.setMinimum(-1000.0)
         self.ZOffset_doubleSpinBox.setMaximum(1000.0)
         self.ZOffset_doubleSpinBox.setSingleStep(0.1)
@@ -627,10 +593,6 @@ class Ui_MainWindow(object):
         self.photo.raise_()
         self.label_15.raise_()
         self.line_3.raise_()
-        self.label_16.raise_()
-        self.XOffset_doubleSpinBox.raise_()
-        self.label_17.raise_()
-        self.YOffset_doubleSpinBox.raise_()
         self.label_18.raise_()
         self.ZOffset_doubleSpinBox.raise_()
         self.label_19.raise_()
@@ -680,6 +642,20 @@ class Ui_MainWindow(object):
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+
+        self.XPos_pushButton.clicked.connect(self.Move_X_positive)
+        self.XNeg_pushButton.clicked.connect(self.Move_X_negative)
+        self.YPos_pushButton.clicked.connect(self.Move_Y_positive)
+        self.YNeg_pushButton.clicked.connect(self.Move_Y_negative)
+        self.ZPos_pushButton.clicked.connect(self.Move_Z_positive)
+        self.ZNeg_pushButton.clicked.connect(self.Move_Z_negative)
+        
+        self.Hundred_radioButton.clicked.connect(lambda: self.display_distance_message(100))
+        self.Ten_radioButton.clicked.connect(lambda: self.display_distance_message(10))
+        self.One_radioButton.clicked.connect(lambda: self.display_distance_message(1))
+        self.DotOne_radioButton.clicked.connect(lambda: self.display_distance_message(0.1))
+        self.Send_pushButton.clicked.connect(self.send_command)
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "CNC Control V1"))
@@ -700,7 +676,7 @@ class Ui_MainWindow(object):
         self.YPos_pushButton.setText(_translate("MainWindow", "Y +"))
         self.YNeg_pushButton.setText(_translate("MainWindow", "Y -"))
         self.XNeg_pushButton.setText(_translate("MainWindow", "X -"))
-        self.XPos_pushButton.setText(_translate("MainWindow", "X -"))
+        self.XPos_pushButton.setText(_translate("MainWindow", "X +"))
         self.ZPos_pushButton.setText(_translate("MainWindow", "Z +"))
         self.ZNeg_pushButton.setText(_translate("MainWindow", "Z -"))
         self.groupBox.setTitle(_translate("MainWindow", "Distance"))
@@ -750,8 +726,6 @@ class Ui_MainWindow(object):
         self.label_13.setText(_translate("MainWindow", "By Nguyen Hoang Khang "))
         self.label_14.setText(_translate("MainWindow", "EEACIU19015 - HCMIU"))
         self.label_15.setText(_translate("MainWindow", "Offset"))
-        self.label_16.setText(_translate("MainWindow", "X offset:"))
-        self.label_17.setText(_translate("MainWindow", "Y offset:"))
         self.label_18.setText(_translate("MainWindow", "Z offset:"))
         self.label_19.setText(_translate("MainWindow", "Offset position"))
         self.Save_pushButton.setText(_translate("MainWindow", "Save"))
@@ -814,7 +788,7 @@ class Ui_MainWindow(object):
                 self.Ten_radioButton.setEnabled(False)
                 self.One_radioButton.setEnabled(False)
                 self.DotOne_radioButton.setEnabled(False)
-                self.disable_move_buttons()
+            
 
     def refresh_ports(self):
         # Clear and repopulate COM ports
@@ -840,87 +814,74 @@ class Ui_MainWindow(object):
             self.Status_textBrowser.append("File selection canceled")     
     def X_Home(self):
         x_coord_v = 0.0 
-        y_coord_v = M_CurrentPos[1]
-        z_coord_v = M_CurrentPos[2]
+        y_coord_v = self.M_CurrentPos[1]
+        z_coord_v = self.M_CurrentPos[2]
 
-        x_ToMove = x_coord_v - M_CurrentPos[0]
-        y_ToMove = y_coord_v - M_CurrentPos[1]
-        z_ToMove = z_coord_v - M_CurrentPos[2]
+        x_ToMove = x_coord_v - self.M_CurrentPos[0]
+        y_ToMove = y_coord_v - self.M_CurrentPos[1]
+        z_ToMove = z_coord_v - self.M_CurrentPos[2]
 
-        M_CurrentPos[0] = x_coord_v
-        M_CurrentPos[1] = y_coord_v
-        M_CurrentPos[2] = z_coord_v
+        self.M_CurrentPos[0] = x_coord_v
+        self.M_CurrentPos[1] = y_coord_v
+        self.M_CurrentPos[2] = z_coord_v
 
-        # Generate the G-code command
-        gcode_command_parts = []
-        gcode_command_parts.append(f"X{x_ToMove}")
-        gcode_command_parts.append(f"Y{y_ToMove}")
-        gcode_command_parts.append(f"Z{z_ToMove}")
-        gcode_command = "G0 " + " ".join(gcode_command_parts)
+        # Generate the G-code command to send
         gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(float(x_ToMove), float(y_ToMove), float(z_ToMove))
         # Send the G-code to Arduino 
         self.send_to_arduino(gcode_send)
-        self.display_gcode(gcode_command)
-        # set line dit cho current pos
-        self.X_lineEdit.setText(str(M_CurrentPos[0]))
-        self.Y_lineEdit.setText(str(M_CurrentPos[1]))
-        self.Z_lineEdit.setText(str(M_CurrentPos[2]))
-    
+        self.display_gcode(gcode_send)
+        # set line edit for current pos
+        self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
+        self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
+        self.Z_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[2]))
+
     def Y_Home(self):
-        x_coord_v = M_CurrentPos[0]
+        x_coord_v = self.M_CurrentPos[0]
         y_coord_v = 0.0
-        z_coord_v = M_CurrentPos[2]
+        z_coord_v = self.M_CurrentPos[2]
 
-        x_ToMove = x_coord_v - M_CurrentPos[0]
-        y_ToMove = y_coord_v - M_CurrentPos[1]
-        z_ToMove = z_coord_v - M_CurrentPos[2]
+        x_ToMove = x_coord_v - self.M_CurrentPos[0]
+        y_ToMove = y_coord_v - self.M_CurrentPos[1]
+        z_ToMove = z_coord_v - self.M_CurrentPos[2]
 
-        M_CurrentPos[0] = x_coord_v
-        M_CurrentPos[1] = y_coord_v
-        M_CurrentPos[2] = z_coord_v
+        self.M_CurrentPos[0] = x_coord_v
+        self.M_CurrentPos[1] = y_coord_v
+        self.M_CurrentPos[2] = z_coord_v
 
-        # Generate the G-code command
-        gcode_command_parts = []
-        gcode_command_parts.append(f"X{x_ToMove}")
-        gcode_command_parts.append(f"Y{y_ToMove}")
-        gcode_command_parts.append(f"Z{z_ToMove}")
-        gcode_command = "G0 " + " ".join(gcode_command_parts)
+        # Generate the G-code command to send
         gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(float(x_ToMove), float(y_ToMove), float(z_ToMove))
         # Send the G-code to Arduino 
         self.send_to_arduino(gcode_send)
-        self.display_gcode(gcode_command)
-        # set line dit cho current pos
-        self.X_lineEdit.setText(str(M_CurrentPos[0]))
-        self.Y_lineEdit.setText(str(M_CurrentPos[1]))
-        self.Z_lineEdit.setText(str(M_CurrentPos[2]))
+        self.display_gcode(gcode_send)
+        # set line edit for current pos
+        self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
+        self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
+        self.Z_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[2]))
+
 
     def Z_Home(self):
-        x_coord_v = M_CurrentPos[0]
-        y_coord_v = M_CurrentPos[1]
+        x_coord_v = self.M_CurrentPos[0]
+        y_coord_v = self.M_CurrentPos[1]
         z_coord_v = 0.0
 
-        x_ToMove = x_coord_v - M_CurrentPos[0]
-        y_ToMove = y_coord_v - M_CurrentPos[1]
-        z_ToMove = z_coord_v - M_CurrentPos[2]
+        x_ToMove = x_coord_v - self.M_CurrentPos[0]
+        y_ToMove = y_coord_v - self.M_CurrentPos[1]
+        z_ToMove = z_coord_v - self.M_CurrentPos[2]
 
-        M_CurrentPos[0] = x_coord_v
-        M_CurrentPos[1] = y_coord_v
-        M_CurrentPos[2] = z_coord_v
+        self.M_CurrentPos[0] = x_coord_v
+        self.M_CurrentPos[1] = y_coord_v
+        self.M_CurrentPos[2] = z_coord_v
 
-        # Generate the G-code command
-        gcode_command_parts = []
-        gcode_command_parts.append(f"X{x_ToMove}")
-        gcode_command_parts.append(f"Y{y_ToMove}")
-        gcode_command_parts.append(f"Z{z_ToMove}")
-        gcode_command = "G0 " + " ".join(gcode_command_parts)
+        # Generate the G-code command to send
         gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(float(x_ToMove), float(y_ToMove), float(z_ToMove))
         # Send the G-code to Arduino 
         self.send_to_arduino(gcode_send)
-        self.display_gcode(gcode_command)
-        # set line dit cho current pos
-        self.X_lineEdit.setText(str(M_CurrentPos[0]))
-        self.Y_lineEdit.setText(str(M_CurrentPos[1]))
-        self.Z_lineEdit.setText(str(M_CurrentPos[2]))
+        self.display_gcode(gcode_send)
+        # set line edit for current pos
+        self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
+        self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
+        self.Z_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[2]))
+
 
     def Home_All(self):
         # Get the values from the lineEdits
@@ -928,28 +889,234 @@ class Ui_MainWindow(object):
         y_coord_v = 0.0 
         z_coord_v = 0.0 
 
-        x_ToMove = x_coord_v - M_CurrentPos[0]
-        y_ToMove = y_coord_v - float(M_CurrentPos[1])
-        z_ToMove = z_coord_v - float(M_CurrentPos[2])
+        x_ToMove = x_coord_v - self.M_CurrentPos[0]
+        y_ToMove = y_coord_v - float(self.M_CurrentPos[1])
+        z_ToMove = z_coord_v - float(self.M_CurrentPos[2])
 
-        M_CurrentPos[0] = x_coord_v
-        M_CurrentPos[1] = y_coord_v
-        M_CurrentPos[2] = z_coord_v
+        self.M_CurrentPos[0] = x_coord_v
+        self.M_CurrentPos[1] = y_coord_v
+        self.M_CurrentPos[2] = z_coord_v
 
         # Generate the G-code command
-        gcode_command_parts = []
-        gcode_command_parts.append(f"X{x_ToMove}")
-        gcode_command_parts.append(f"Y{y_ToMove}")
-        gcode_command_parts.append(f"Z{z_ToMove}")
-        gcode_command = "G0 " + " ".join(gcode_command_parts)
         gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(float(x_ToMove), float(y_ToMove), float(z_ToMove))
         # Send the G-code to Arduino 
         self.send_to_arduino(gcode_send)
-        self.display_gcode(gcode_command)
-        # set line dit cho current pos
-        self.X_lineEdit.setText(str(M_CurrentPos[0]))
-        self.Y_lineEdit.setText(str(M_CurrentPos[1]))
-        self.Z_lineEdit.setText(str(M_CurrentPos[2]))
+        self.display_gcode(gcode_send)
+        # set line edit for current pos
+        self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
+        self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
+        self.Z_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[2]))
+
+    def Move_X_positive(self):
+        if self.Connect_pushButton.text() == "Disconnect":
+            if self.M_CurrentPos[0] < self.Machine_Max_UpperLim[0]:
+                VAL = 0.0
+                if self.Hundred_radioButton.isChecked():
+                    VAL = 100
+                elif self.Ten_radioButton.isChecked():
+                    VAL = 10
+                elif self.One_radioButton.isChecked():
+                    VAL = 1
+                elif self.DotOne_radioButton.isChecked():
+                    VAL = 0.1
+                else:
+                    gcode_send = ""
+                    current_time = datetime.now().strftime('%H:%M:%S')
+                    self.Status_textBrowser.append(f"[{current_time}] Please Check in check box")
+                
+                if  self.M_CurrentPos[0] + VAL >  self.Machine_Max_UpperLim[0]:
+                    VAL = self.Machine_Max_UpperLim[0] - self.M_CurrentPos[0]
+                    self.M_CurrentPos[0] = self.Machine_Max_UpperLim[0]
+                else:
+                    self.M_CurrentPos[0] = self.M_CurrentPos[0] + VAL
+
+                self.X_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[0])))
+                gcode_send = "G0X{:0=+06.1f}".format(VAL)
+                self.send_to_arduino(gcode_send)
+                self.display_gcode(gcode_send)
+            else:
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!")
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+
+    def Move_X_negative(self):
+        if self.Connect_pushButton.text() == "Disconnect":
+            if self.M_CurrentPos[0] >  self.Machine_Max_LowerLim[0]:
+                VAL = 0.0
+                if self.Hundred_radioButton.isChecked():
+                    VAL = -100
+                elif self.Ten_radioButton.isChecked():
+                    VAL = -10
+                elif self.One_radioButton.isChecked():
+                    VAL = -1
+                elif self.DotOne_radioButton.isChecked():
+                    VAL = -0.1
+                else:
+                    gcode_send = ""
+                    current_time = datetime.now().strftime('%H:%M:%S')
+                    self.Status_textBrowser.append(f"[{current_time}] Please Check in check box")
+                
+                if  self.M_CurrentPos[0] + VAL <  self.Machine_Max_LowerLim[0]:
+                    VAL = self.Machine_Max_LowerLim[0] - self.M_CurrentPos[0]
+                    self.M_CurrentPos[0] = self.Machine_Max_LowerLim[0]
+                else:
+                    self.M_CurrentPos[0] = self.M_CurrentPos[0] + VAL
+
+                self.X_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[0])))
+                gcode_send = "G0X{:0=+06.1f}".format(VAL)
+                self.send_to_arduino(gcode_send)
+                self.display_gcode(gcode_send)
+            else:
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!")
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+
+    def Move_Y_positive(self):
+        if self.Connect_pushButton.text() == "Disconnect":
+            if self.M_CurrentPos[1] < self.Machine_Max_UpperLim[1]:
+                VAL = 0.0
+                if self.Hundred_radioButton.isChecked():
+                    VAL = 100
+                elif self.Ten_radioButton.isChecked():
+                    VAL = 10
+                elif self.One_radioButton.isChecked():
+                    VAL = 1
+                elif self.DotOne_radioButton.isChecked():
+                    VAL = 0.1
+                else:
+                    gcode_send = ""
+                    current_time = datetime.now().strftime('%H:%M:%S')
+                    self.Status_textBrowser.append(f"[{current_time}] Please Check in check box")
+                
+                if  self.M_CurrentPos[1] + VAL >  self.Machine_Max_UpperLim[1]:
+                    VAL = self.Machine_Max_UpperLim[1] - self.M_CurrentPos[1]
+                    self.M_CurrentPos[1] = self.Machine_Max_UpperLim[1]
+                else:
+                    self.M_CurrentPos[1] = self.M_CurrentPos[1] + VAL
+
+                self.Y_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[1])))
+                gcode_send = "G0Y{:0=+06.1f}".format(VAL)
+                self.send_to_arduino(gcode_send)
+                self.display_gcode(gcode_send)
+            else:
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!")  
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+
+    def Move_Y_negative(self):
+        if self.Connect_pushButton.text() == "Disconnect":
+            if self.M_CurrentPos[1] >  self.Machine_Max_LowerLim[1]:
+                VAL = 0.0
+                if self.Hundred_radioButton.isChecked():
+                    VAL = -100
+                elif self.Ten_radioButton.isChecked():
+                    VAL = -10
+                elif self.One_radioButton.isChecked():
+                    VAL = -1
+                elif self.DotOne_radioButton.isChecked():
+                    VAL = -0.1
+                else:
+                    gcode_send = ""
+                    current_time = datetime.now().strftime('%H:%M:%S')
+                    self.Status_textBrowser.append(f"[{current_time}] Please Check in check box")
+                
+                if  self.M_CurrentPos[1] + VAL <  self.Machine_Max_LowerLim[1]:
+                    VAL = self.Machine_Max_LowerLim[1] - self.M_CurrentPos[1]
+                    self.M_CurrentPos[1] = self.Machine_Max_LowerLim[1]
+                else:
+                    self.M_CurrentPos[1] = self.M_CurrentPos[1] + VAL
+
+                self.Y_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[1])))
+                gcode_send = "G0Y{:0=+06.1f}".format(VAL)
+                self.send_to_arduino(gcode_send)
+                self.display_gcode(gcode_send)
+            else:
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!")
+
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+
+    def Move_Z_positive(self):
+        if self.Connect_pushButton.text() == "Disconnect":
+            if self.M_CurrentPos[2] < self.Machine_Max_UpperLim[2]:
+                VAL = 0.0
+                if self.Hundred_radioButton.isChecked():
+                    VAL = 100
+                elif self.Ten_radioButton.isChecked():
+                    VAL = 10
+                elif self.One_radioButton.isChecked():
+                    VAL = 1
+                elif self.DotOne_radioButton.isChecked():
+                    VAL = 0.1
+                else:
+                    gcode_send = ""
+                    current_time = datetime.now().strftime('%H:%M:%S')
+                    self.Status_textBrowser.append(f"[{current_time}] Please Check in check box")
+                
+                if  self.M_CurrentPos[2] + VAL >  self.Machine_Max_UpperLim[2]:
+                    VAL = self.Machine_Max_UpperLim[2] - self.M_CurrentPos[2]
+                    self.M_CurrentPos[2] = self.Machine_Max_UpperLim[2]
+                else:
+                    self.M_CurrentPos[2] = self.M_CurrentPos[2] + VAL
+
+                self.Z_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[2])))
+                gcode_send = "G0Z{:0=+06.1f}".format(VAL)
+                self.send_to_arduino(gcode_send)
+                self.display_gcode(gcode_send)
+            else:
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!") 
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+
+    def Move_Z_negative(self):
+        if self.Connect_pushButton.text() == "Disconnect":
+            if self.M_CurrentPos[2] >  self.Machine_Max_LowerLim[2]:
+                VAL = 0.0
+                if self.Hundred_radioButton.isChecked():
+                    VAL = -100
+                elif self.Ten_radioButton.isChecked():
+                    VAL = -10
+                elif self.One_radioButton.isChecked():
+                    VAL = -1
+                elif self.DotOne_radioButton.isChecked():
+                    VAL = -0.1
+                else:
+                    gcode_send = ""
+                    current_time = datetime.now().strftime('%H:%M:%S')
+                    self.Status_textBrowser.append(f"[{current_time}] Please Check in check box")
+                
+                if  self.M_CurrentPos[2] + VAL <  self.Machine_Max_LowerLim[2]:
+                    VAL = self.Machine_Max_LowerLim[2] - self.M_CurrentPos[2]
+                    self.M_CurrentPos[2] = self.Machine_Max_LowerLim[2]
+                else:
+                    self.M_CurrentPos[2] = self.M_CurrentPos[2] + VAL
+
+                self.Z_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[2])))
+                gcode_send = "G0Z{:0=+06.1f}".format(VAL)
+                self.send_to_arduino(gcode_send)
+                self.display_gcode(gcode_send)
+            else:
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!")
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+
+
+    def display_distance_message(self, distance):
+        current_time = datetime.now().strftime('%H:%M:%S')
+        self.Status_textBrowser.append(f"[{current_time}] Distance set at {distance} mm")
+
 
     def check_available(self):
         if self.Connect_pushButton.text() == "Disconnect" and self.IsMoving == 1:
@@ -961,63 +1128,120 @@ class Ui_MainWindow(object):
     def move_command(self):
             # Get the values from the lineEdits
             if not self.X_lineEdit.text():
-                x_coord_v = M_CurrentPos[0]
+                x_coord_v = self.M_CurrentPos[0]
             else:
                 x_coord_v = float(self.X_lineEdit.text())
 
             if not self.Y_lineEdit.text():
-                y_coord_v = M_CurrentPos[0]
+                y_coord_v = self.M_CurrentPos[0]
             else:
                 y_coord_v = float(self.Y_lineEdit.text())
 
             if not self.Z_lineEdit.text():
-                z_coord_v = M_CurrentPos[0]
+                z_coord_v = self.M_CurrentPos[0]
             else:
                 z_coord_v = float(self.Z_lineEdit.text())
         
-            if  x_coord_v > Machine_Max_UpperLim[0]:
-                x_coord_v = Machine_Max_UpperLim[0]
+            if  x_coord_v > self.Machine_Max_UpperLim[0]:
+                x_coord_v = self.Machine_Max_UpperLim[0]
 
-            if  y_coord_v > Machine_Max_UpperLim[1]:
-                y_coord_v = Machine_Max_UpperLim[1]
+            if  y_coord_v > self.Machine_Max_UpperLim[1]:
+                y_coord_v = self.Machine_Max_UpperLim[1]
 
-            if  z_coord_v > Machine_Max_UpperLim[2]:
-                z_coord_v = Machine_Max_UpperLim[2]
+            if  z_coord_v > self.Machine_Max_UpperLim[2]:
+                z_coord_v = self.Machine_Max_UpperLim[2]
 
-            if  x_coord_v < Machine_Max_LowerLim[0]:
-                x_coord_v = Machine_Max_LowerLim[0]
+            if  x_coord_v < self.Machine_Max_LowerLim[0]:
+                x_coord_v = self.Machine_Max_LowerLim[0]
 
-            if  y_coord_v < Machine_Max_LowerLim[1]:
-                y_coord_v = Machine_Max_LowerLim[1]
+            if  y_coord_v < self.Machine_Max_LowerLim[1]:
+                y_coord_v = self.Machine_Max_LowerLim[1]
             
-            if  z_coord_v < Machine_Max_LowerLim[2]:
-                z_coord_v = Machine_Max_LowerLim[2]
+            if  z_coord_v < self.Machine_Max_LowerLim[2]:
+                z_coord_v = self.Machine_Max_LowerLim[2]
 
-            x_ToMove = x_coord_v - float(M_CurrentPos[0])
-            y_ToMove = y_coord_v - float(M_CurrentPos[1])
-            z_ToMove = z_coord_v - float(M_CurrentPos[2])
+            x_ToMove = x_coord_v - float(self.M_CurrentPos[0])
+            y_ToMove = y_coord_v - float(self.M_CurrentPos[1])
+            z_ToMove = z_coord_v - float(self.M_CurrentPos[2])
 
-            M_CurrentPos[0] = x_coord_v
-            M_CurrentPos[1] = y_coord_v
-            M_CurrentPos[2] = z_coord_v
+            self.M_CurrentPos[0] = x_coord_v
+            self.M_CurrentPos[1] = y_coord_v
+            self.M_CurrentPos[2] = z_coord_v
 
             # Generate the G-code command
-            gcode_command_parts = []
-            gcode_command_parts.append(f"X{x_ToMove}")
-            gcode_command_parts.append(f"Y{y_ToMove}")
-            gcode_command_parts.append(f"Z{z_ToMove}")
-            gcode_command = "G0 " + " ".join(gcode_command_parts)
             gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(float(x_ToMove), float(y_ToMove), float(z_ToMove))
 
             # Send the G-code to Arduino
             self.send_to_arduino(gcode_send)
-            self.display_gcode(gcode_command)
-            # set linerdit cho current pos
-            self.X_lineEdit.setText(str(M_CurrentPos[0]))
-            self.Y_lineEdit.setText(str(M_CurrentPos[1]))
-            self.Z_lineEdit.setText(str(M_CurrentPos[2]))
-
+            self.display_gcode(gcode_send)
+            # set linerdit for current pos
+            self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
+            self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
+            self.Z_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[2]))
             
+    def send_command(self):
+        command = self.ManualCommand_lineEdit.text().strip().upper() 
+        if not command.startswith("G0"):
+            self.Status_textBrowser.append("Error: Invalid G-code format")
+            return
+        
+        x_coord_v = self.M_CurrentPos[0]
+        y_coord_v = self.M_CurrentPos[1]
+        z_coord_v = self.M_CurrentPos[2]
+
+        if 'X' in command:
+            x_index = command.index('X') + 1
+            x_str = ''
+            while x_index < len(command) and (command[x_index].isdigit() or command[x_index] == '.' or command[x_index] == '-'):
+                x_str += command[x_index]
+                x_index += 1
+            if x_str:
+                x_coord_v = float(x_str)
+
+        if 'Y' in command:
+            y_index = command.index('Y') + 1
+            y_str = ''
+            while y_index < len(command) and (command[y_index].isdigit() or command[y_index] == '.' or command[y_index] == '-'):
+                y_str += command[y_index]
+                y_index += 1
+            if y_str:
+                y_coord_v = float(y_str)
+
+        if 'Z' in command:
+            z_index = command.index('Z') + 1
+            z_str = ''
+            while z_index < len(command) and (command[z_index].isdigit() or command[z_index] == '.' or command[z_index] == '-'):
+                z_str += command[z_index]
+                z_index += 1
+            if z_str:
+                z_coord_v = float(z_str)
+
+        # Check Lim
+        x_coord_v = min(max(x_coord_v, self.Machine_Max_LowerLim[0]), self.Machine_Max_UpperLim[0])
+        y_coord_v = min(max(y_coord_v, self.Machine_Max_LowerLim[1]), self.Machine_Max_UpperLim[1])
+        z_coord_v = min(max(z_coord_v, self.Machine_Max_LowerLim[2]), self.Machine_Max_UpperLim[2])
+
+        x_ToMove = x_coord_v - self.M_CurrentPos[0]
+        y_ToMove = y_coord_v - self.M_CurrentPos[1]
+        z_ToMove = z_coord_v - self.M_CurrentPos[2]
+
+        self.M_CurrentPos[0] = x_coord_v
+        self.M_CurrentPos[1] = y_coord_v
+        self.M_CurrentPos[2] = z_coord_v
+
+        gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(x_ToMove, y_ToMove, z_ToMove)
+
+        if hasattr(self, 'ser') and self.ser.is_open:
+            self.send_to_arduino(gcode_send)
+            self.display_gcode(gcode_send)
+        else:
+            self.Status_textBrowser.append(datetime.now().strftime("[%H:%M:%S]: ")+"Error: Serial port is not open or command is empty")
+
+        # Cập nhật các giá trị hiện tại
+        self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
+        self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
+        self.Z_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[2]))
+
 
     def send_to_arduino(self, gcode_send):
         if hasattr(self, 'ser') and self.ser.is_open:
@@ -1034,100 +1258,7 @@ class Ui_MainWindow(object):
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
-
-    def check_radio_buttons(self):
-        if hasattr(self, 'ser') and self.ser.is_open:
-                
-            if      self.Hundred_radioButton.isChecked():
-                    current_time = datetime.now().strftime('%H:%M:%S')
-                    self.Status_textBrowser.append(f"[{current_time}] Distance set at 100 mm")
-                    self.Hundred_movement()
-                    self.enable_move_buttons()
-            elif    self.Ten_radioButton.isChecked():
-                    current_time = datetime.now().strftime('%H:%M:%S')
-                    self.Status_textBrowser.append(f"[{current_time}] Distance set at 10 mm")
-                    self.Ten_movement()
-                    self.enable_move_buttons()
-            elif    self.One_radioButton.isChecked():
-                    current_time = datetime.now().strftime('%H:%M:%S')
-                    self.Status_textBrowser.append(f"[{current_time}] Distance set at 1 mm")
-                    self.One_movement()
-                    self.enable_move_buttons()
-            elif    self.DotOne_radioButton.isChecked():
-                    current_time = datetime.now().strftime('%H:%M:%S')
-                    self.Status_textBrowser.append(f"[{current_time}] Distance set at 0.1 mm")
-                    self.DotOne_movement()
-                    self.enable_move_buttons()
-            else:
-                    self.disable_move_buttons()
-        else:
-            current_time = datetime.now().strftime('%H:%M:%S')
-            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
-
-    def Hundred_movement(self):
-        self.XPos_pushButton.clicked.connect(lambda: self.move_axis('X', 100))
-        self.XNeg_pushButton.clicked.connect(lambda: self.move_axis('X', -100))
-        self.YPos_pushButton.clicked.connect(lambda: self.move_axis('Y', 100))
-        self.YNeg_pushButton.clicked.connect(lambda: self.move_axis('Y', -100))
-        self.ZPos_pushButton.clicked.connect(lambda: self.move_axis('Z', 100))
-        self.ZNeg_pushButton.clicked.connect(lambda: self.move_axis('Z', -100))
-    
-    def Ten_movement(self):
-        self.XPos_pushButton.clicked.connect(lambda: self.move_axis('X', 10))
-        self.XNeg_pushButton.clicked.connect(lambda: self.move_axis('X', -10))
-        self.YPos_pushButton.clicked.connect(lambda: self.move_axis('Y', 10))
-        self.YNeg_pushButton.clicked.connect(lambda: self.move_axis('Y', -10))
-        self.ZPos_pushButton.clicked.connect(lambda: self.move_axis('Z', 10))
-        self.ZNeg_pushButton.clicked.connect(lambda: self.move_axis('Z', -10))
-    
-    def One_movement(self):
-        self.XPos_pushButton.clicked.connect(lambda: self.move_axis('X', 1))
-        self.XNeg_pushButton.clicked.connect(lambda: self.move_axis('X', -1))
-        self.YPos_pushButton.clicked.connect(lambda: self.move_axis('Y', 1))
-        self.YNeg_pushButton.clicked.connect(lambda: self.move_axis('Y', -1))
-        self.ZPos_pushButton.clicked.connect(lambda: self.move_axis('Z', 1))
-        self.ZNeg_pushButton.clicked.connect(lambda: self.move_axis('Z', -1))
-    
-    def DotOne_movement(self):
-        self.XPos_pushButton.clicked.connect(lambda: self.move_axis('X', 0.1))
-        self.XNeg_pushButton.clicked.connect(lambda: self.move_axis('X', -0.1))
-        self.YPos_pushButton.clicked.connect(lambda: self.move_axis('Y', 0.1))
-        self.YNeg_pushButton.clicked.connect(lambda: self.move_axis('Y', -0.1))
-        self.ZPos_pushButton.clicked.connect(lambda: self.move_axis('Z', 0.1))
-        self.ZNeg_pushButton.clicked.connect(lambda: self.move_axis('Z', -0.1))
-
-    def move_axis(self, axis, distance):
-        gcode_command = f"G0{axis}{distance:+06.1f}"
-        current_time = datetime.now().strftime('%H:%M:%S')
-        self.Status_textBrowser.append(f"[{current_time}] {axis} go {distance} mm") 
-        self.send_to_arduino(gcode_command)
-
-        if axis == 'X':
-            self.M_CurrentPos[0] = M_CurrentPos[0] + distance
-        elif axis == 'Y':
-            self.M_CurrentPos[1] = M_CurrentPos[1] + distance
-        elif axis == 'Z':
-            self.M_CurrentPos[2] = M_CurrentPos[2] + distance
-
-
-    def disable_move_buttons(self):
-        self.XPos_pushButton.setEnabled(False)
-        self.XNeg_pushButton.setEnabled(False)
-        self.YPos_pushButton.setEnabled(False)
-        self.YNeg_pushButton.setEnabled(False)
-        self.ZPos_pushButton.setEnabled(False)
-        self.ZNeg_pushButton.setEnabled(False)
-                
-
-    def enable_move_buttons(self):
-        self.XPos_pushButton.setEnabled(True)
-        self.XNeg_pushButton.setEnabled(True)
-        self.YPos_pushButton.setEnabled(True)
-        self.YNeg_pushButton.setEnabled(True)
-        self.ZPos_pushButton.setEnabled(True)
-        self.ZNeg_pushButton.setEnabled(True)
         
-
     def update_speed_label(self):
         slider_value = self.Speed_horizontalSlider.value()  # Get the current slider value
         speeds = {
@@ -1142,7 +1273,6 @@ class Ui_MainWindow(object):
         self.label_22.setText(f"{x_speed}, {y_speed}, {z_speed}")
         self.Status_textBrowser.append(f"[{current_time}] Speed set at {x_speed}, {y_speed}, {z_speed} (mm/min)")
 
-
     def update_speed_label1(self):
         slider_value = self.Speed_horizontalSlider.value()  # Get the current slider value
         speed_commands = {
@@ -1154,7 +1284,6 @@ class Ui_MainWindow(object):
         }
         speed_command = speed_commands.get(slider_value, "S1")  # Default to SS1 if value not found
         self.send_speed_to_arduino(speed_command)
-
 
     def send_speed_to_arduino(self, speed_command):
         if hasattr(self, 'ser') and self.ser.is_open:
@@ -1194,7 +1323,6 @@ class Ui_MainWindow(object):
         accel_command = accel_commands.get(slider_value, "A1")  # Default to SA1 if value not found
         self.send_accel_to_arduino(accel_command)
 
-
     def send_accel_to_arduino(self, accel_command):
         if hasattr(self, 'ser') and self.ser.is_open:
             try:
@@ -1225,6 +1353,10 @@ class Ui_MainWindow(object):
             self.Status_textBrowser.append(datetime.now().strftime("[%H:%M:%S]: ") +"DONE")  
             self.tab.setEnabled(True)
         
+
+
+    
+
 
 if __name__ == "__main__":
     import sys
