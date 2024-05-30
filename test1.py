@@ -1,15 +1,24 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem
+from PyQt5.QtWidgets import QFileDialog
 import serial
 import serial.tools.list_ports
 from datetime import datetime
+from PyQt5.QtCore import QTimer
 
+DegValidator = QtGui.QDoubleValidator(
+                -9999.0, # bottom
+                9999.0, # top
+                1, # decimals 
+                notation=QtGui.QDoubleValidator.StandardNotation)
 
 OnlyFloat = QtGui.QDoubleValidator(
                 -9999.0, # bottom
                 9999.0, # top
                 1, # decimals 
                 notation=QtGui.QDoubleValidator.StandardNotation)
+
+DegValidator.setRange(-9999.0, 9999.0)  # Set the range for integer input
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -180,7 +189,6 @@ class Ui_MainWindow(object):
         self.Ten_radioButton.setEnabled(False)
         self.One_radioButton.setEnabled(False)
         self.DotOne_radioButton.setEnabled(False)
-                  
         self.line = QtWidgets.QFrame(self.tab)
         self.line.setGeometry(QtCore.QRect(500, 20, 20, 201))
         self.line.setFrameShape(QtWidgets.QFrame.VLine)
@@ -655,6 +663,11 @@ class Ui_MainWindow(object):
         self.One_radioButton.clicked.connect(lambda: self.display_distance_message(1))
         self.DotOne_radioButton.clicked.connect(lambda: self.display_distance_message(0.1))
         self.Send_pushButton.clicked.connect(self.send_command)
+    #---------------------CHECK MESSAGE---------#
+        #timer
+        self.timer1 = QTimer(self.tab)
+        self.timer1.timeout.connect(self.check_available)
+        self.timer1.start(0)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -808,10 +821,12 @@ class Ui_MainWindow(object):
         fileName, _ = QFileDialog.getOpenFileName(None, "Browse G-code file", "", "Text Files (*.txt);;All Files (*)", options=options)
         if fileName:
             print(f"Selected file: {fileName}")
-            self.Status_textBrowser.append(f"Selected file: {fileName}")
+            current_time = datetime.now().strftime('%H:%M:%S')  # Get the current time
+            self.Gcode_textBrowser.append(f"{fileName}")
         else:
             print("File selection canceled")
-            self.Status_textBrowser.append("File selection canceled")     
+            current_time = datetime.now().strftime('%H:%M:%S')  # Get the current time
+            self.Status_textBrowser.append(f"[{current_time}]File selection canceled")     
     def X_Home(self):
         x_coord_v = 0.0 
         y_coord_v = self.M_CurrentPos[1]
@@ -1043,7 +1058,7 @@ class Ui_MainWindow(object):
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
-
+        
     def Move_Z_positive(self):
         if self.Connect_pushButton.text() == "Disconnect":
             if self.M_CurrentPos[2] < self.Machine_Max_UpperLim[2]:
@@ -1111,21 +1126,31 @@ class Ui_MainWindow(object):
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
-
-
+        
     def display_distance_message(self, distance):
         current_time = datetime.now().strftime('%H:%M:%S')
         self.Status_textBrowser.append(f"[{current_time}] Distance set at {distance} mm")
 
+    def linear_interpolate(self, X1, Y1, X2, Y2):
+    
+        m = (Y2 - Y1) / (X2 - X1)
+        b = Y1 - m * X1
+        
+        interpolated_points = []
+        
+        num_steps = int(max(abs(X2 - X1), abs(Y2 - Y1)) * 10)  
+        
+        for i in range(num_steps + 1):
+            x = X1 + (X2 - X1) * i / num_steps
+            y = m * x + b
+            interpolated_points.append((x, y))
+        
+        return interpolated_points
 
-    def check_available(self):
-        if self.Connect_pushButton.text() == "Disconnect" and self.IsMoving == 1:
-            data = self.read_from_serial_port()
-            if data is not None and data.strip() == 'Done':  # Check if 'Done' message is received
-                self.Enable_Function()  # Enable all functions
-                self.IsMoving = 0
 
     def move_command(self):
+        if self.Connect_pushButton.text() == "Disconnect":
+            self.IsMoving = 1
             # Get the values from the lineEdits
             if not self.X_lineEdit.text():
                 x_coord_v = self.M_CurrentPos[0]
@@ -1133,51 +1158,45 @@ class Ui_MainWindow(object):
                 x_coord_v = float(self.X_lineEdit.text())
 
             if not self.Y_lineEdit.text():
-                y_coord_v = self.M_CurrentPos[0]
+                y_coord_v = self.M_CurrentPos[1]
             else:
                 y_coord_v = float(self.Y_lineEdit.text())
 
             if not self.Z_lineEdit.text():
-                z_coord_v = self.M_CurrentPos[0]
+                z_coord_v = self.M_CurrentPos[2]
             else:
                 z_coord_v = float(self.Z_lineEdit.text())
-        
-            if  x_coord_v > self.Machine_Max_UpperLim[0]:
-                x_coord_v = self.Machine_Max_UpperLim[0]
 
-            if  y_coord_v > self.Machine_Max_UpperLim[1]:
-                y_coord_v = self.Machine_Max_UpperLim[1]
+            # Limit the coordinates to the machine's limits
+            x_coord_v = min(max(x_coord_v, self.Machine_Max_LowerLim[0]), self.Machine_Max_UpperLim[0])
+            y_coord_v = min(max(y_coord_v, self.Machine_Max_LowerLim[1]), self.Machine_Max_UpperLim[1])
+            z_coord_v = min(max(z_coord_v, self.Machine_Max_LowerLim[2]), self.Machine_Max_UpperLim[2])
 
-            if  z_coord_v > self.Machine_Max_UpperLim[2]:
-                z_coord_v = self.Machine_Max_UpperLim[2]
+            # Calculate the move distance
+            x_to_move = x_coord_v - self.M_CurrentPos[0]
+            y_to_move = y_coord_v - self.M_CurrentPos[1]
+            z_to_move = z_coord_v - self.M_CurrentPos[2]
 
-            if  x_coord_v < self.Machine_Max_LowerLim[0]:
-                x_coord_v = self.Machine_Max_LowerLim[0]
+            # Interpolate between current position and target position
+            interpolated_points = self.linear_interpolate(self.M_CurrentPos[0], self.M_CurrentPos[1], x_coord_v, y_coord_v)
 
-            if  y_coord_v < self.Machine_Max_LowerLim[1]:
-                y_coord_v = self.Machine_Max_LowerLim[1]
-            
-            if  z_coord_v < self.Machine_Max_LowerLim[2]:
-                z_coord_v = self.Machine_Max_LowerLim[2]
-
-            x_ToMove = x_coord_v - float(self.M_CurrentPos[0])
-            y_ToMove = y_coord_v - float(self.M_CurrentPos[1])
-            z_ToMove = z_coord_v - float(self.M_CurrentPos[2])
-
+            # Update the current position
             self.M_CurrentPos[0] = x_coord_v
             self.M_CurrentPos[1] = y_coord_v
             self.M_CurrentPos[2] = z_coord_v
 
-            # Generate the G-code command
-            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(float(x_ToMove), float(y_ToMove), float(z_ToMove))
-
-            # Send the G-code to Arduino
-            self.send_to_arduino(gcode_send)
+            # Generate and send the G-code commands
+            for point in interpolated_points:
+                gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(point[0], point[1], z_coord_v)
+                self.send_to_arduino(gcode_send)
+                
             self.display_gcode(gcode_send)
-            # set linerdit for current pos
+
+            # Set lineEdits for current position
             self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
             self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
             self.Z_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[2]))
+        self.Disable_Function()
             
     def send_command(self):
         command = self.ManualCommand_lineEdit.text().strip().upper() 
@@ -1229,7 +1248,7 @@ class Ui_MainWindow(object):
         self.M_CurrentPos[1] = y_coord_v
         self.M_CurrentPos[2] = z_coord_v
 
-        gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(x_ToMove, y_ToMove, z_ToMove)
+        gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}\n".format(x_ToMove, y_ToMove, z_ToMove)
 
         if hasattr(self, 'ser') and self.ser.is_open:
             self.send_to_arduino(gcode_send)
@@ -1237,7 +1256,7 @@ class Ui_MainWindow(object):
         else:
             self.Status_textBrowser.append(datetime.now().strftime("[%H:%M:%S]: ")+"Error: Serial port is not open or command is empty")
 
-        # Cập nhật các giá trị hiện tại
+        # Update current position
         self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
         self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
         self.Z_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[2]))
@@ -1335,10 +1354,20 @@ class Ui_MainWindow(object):
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
 
+    def read_from_serial_port(self):
+        try:
+            if self.ser.in_waiting > 0:
+                data = self.ser.readline().decode().strip()
+                if data == 'ok':
+                    return data
+        except serial.SerialException as e:
+            print(f"Failed to read from serial port: {e}")
+            return None
+        
     def check_available(self):
         if self.Connect_pushButton.text() == "Disconnect" and self.IsMoving == 1:
             data = self.read_from_serial_port()
-            if data is not None and data.strip() == 'Done':  # Check if 'Done' message is received
+            if data is not None and data.strip() == 'Ok':  # Check if 'Ok' message is received
                 self.Enable_Function()
                 self.IsMoving = 0
 
@@ -1346,17 +1375,7 @@ class Ui_MainWindow(object):
         self.tab.setEnabled(False)
 
     def Enable_Function(self): 
-        if self.AdjustFlag == 1:
-            self.Status_textBrowser.append(datetime.now().strftime("[%H:%M:%S]: ") +"Successful")  
-            self.AdjustFlag = 0
-        else:
-            self.Status_textBrowser.append(datetime.now().strftime("[%H:%M:%S]: ") +"DONE")  
-            self.tab.setEnabled(True)
-        
-
-
-    
-
+        self.tab.setEnabled(True)
 
 if __name__ == "__main__":
     import sys
