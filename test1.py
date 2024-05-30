@@ -815,16 +815,20 @@ class Ui_MainWindow(object):
         self.Status_textBrowser.clear()
     
     def browse_file(self):
-        options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(None, "Browse G-code file", "", "Text Files (*.txt);;All Files (*)", options=options)
-        if fileName:
-            print(f"Selected file: {fileName}")
-            current_time = datetime.now().strftime('%H:%M:%S')  # Get the current time
-            self.Gcode_textBrowser.append(f"{fileName}")
+        if self.Connect_pushButton.text() == "Disconnect":
+            options = QFileDialog.Options()
+            fileName, _ = QFileDialog.getOpenFileName(None, "Browse G-code file", "", "Text Files (*.txt);;All Files (*)", options=options)
+            if fileName:
+                print(f"Selected file: {fileName}")
+                current_time = datetime.now().strftime('%H:%M:%S')  # Get the current time
+                self.Gcode_textBrowser.append(f"{fileName}")
+            else:
+                print("File selection canceled")
+                current_time = datetime.now().strftime('%H:%M:%S')  # Get the current time
+                self.Status_textBrowser.append(f"[{current_time}]File selection canceled")  
         else:
-            print("File selection canceled")
-            current_time = datetime.now().strftime('%H:%M:%S')  # Get the current time
-            self.Status_textBrowser.append(f"[{current_time}]File selection canceled")     
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")   
     def X_Home(self):
         if self.Connect_pushButton.text() == "Disconnect":
             self.IsMoving = 1
@@ -840,12 +844,14 @@ class Ui_MainWindow(object):
             self.M_CurrentPos[1] = y_coord_v
             self.M_CurrentPos[2] = z_coord_v
 
-            # Generate the G-code command to send
-            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(float(x_ToMove), float(y_ToMove), float(z_ToMove))
+            # Generate the G-code command
+            steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, z_ToMove)
+            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(steps[0], steps[1], steps[2])
+            gcode_display = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(x_ToMove, y_ToMove, z_ToMove)
             # Send the G-code to Arduino 
             self.send_to_arduino(gcode_send)
-            self.display_gcode(gcode_send)
-            # set line edit for current pos
+            self.display_gcode(gcode_display)
+            # Set line edit for current pos
             self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
             self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
             self.Z_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[2]))
@@ -869,12 +875,14 @@ class Ui_MainWindow(object):
             self.M_CurrentPos[1] = y_coord_v
             self.M_CurrentPos[2] = z_coord_v
 
-            # Generate the G-code command to send
-            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(float(x_ToMove), float(y_ToMove), float(z_ToMove))
+            # Generate the G-code command
+            steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, z_ToMove)
+            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(steps[0], steps[1], steps[2])
+            gcode_display = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(x_ToMove, y_ToMove, z_ToMove)
             # Send the G-code to Arduino 
             self.send_to_arduino(gcode_send)
-            self.display_gcode(gcode_send)
-            # set line edit for current pos
+            self.display_gcode(gcode_display)
+            # Set line edit for current pos
             self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
             self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
             self.Z_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[2]))
@@ -899,12 +907,14 @@ class Ui_MainWindow(object):
             self.M_CurrentPos[1] = y_coord_v
             self.M_CurrentPos[2] = z_coord_v
 
-            # Generate the G-code command to send
-            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(float(x_ToMove), float(y_ToMove), float(z_ToMove))
+            # Generate the G-code command
+            steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, z_ToMove)
+            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(steps[0], steps[1], steps[2])
+            gcode_display = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(x_ToMove, y_ToMove, z_ToMove)
             # Send the G-code to Arduino 
             self.send_to_arduino(gcode_send)
-            self.display_gcode(gcode_send)
-            # set line edit for current pos
+            self.display_gcode(gcode_display)
+            # Set line edit for current pos
             self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
             self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
             self.Z_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[2]))
@@ -931,10 +941,13 @@ class Ui_MainWindow(object):
             self.M_CurrentPos[2] = z_coord_v
 
             # Generate the G-code command
-            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(float(x_ToMove), float(y_ToMove), float(z_ToMove))
+            steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, z_ToMove)
+            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(steps[0], steps[1], steps[2])
+            gcode_display = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(x_ToMove, y_ToMove, z_ToMove)
             # Send the G-code to Arduino 
             self.send_to_arduino(gcode_send)
-            self.display_gcode(gcode_send)
+            self.display_gcode(gcode_display)
+
             # set line edit for current pos
             self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
             self.Y_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[1]))
@@ -969,13 +982,15 @@ class Ui_MainWindow(object):
                     self.M_CurrentPos[0] = self.M_CurrentPos[0] + VAL
 
                 self.X_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[0])))
-                gcode_send = "G0X{:0=+06.1f}".format(VAL)
+                gcode_send = "G0X{:0=+06.1f}".format(VAL*(200/8))
+                gcode_display = "G0X{:0=+06.1f}".format(VAL)
                 self.send_to_arduino(gcode_send)
-                self.display_gcode(gcode_send)
+                self.display_gcode(gcode_display)
+                self.Disable_Function()
             else:
                 current_time = datetime.now().strftime('%H:%M:%S')
                 self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!")
-            self.Disable_Function()
+           
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
@@ -1005,13 +1020,14 @@ class Ui_MainWindow(object):
                     self.M_CurrentPos[0] = self.M_CurrentPos[0] + VAL
 
                 self.X_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[0])))
-                gcode_send = "G0X{:0=+06.1f}".format(VAL)
+                gcode_send = "G0X{:0=+06.1f}".format(VAL*(200/8))
+                gcode_display = "G0X{:0=+06.1f}".format(VAL)
                 self.send_to_arduino(gcode_send)
-                self.display_gcode(gcode_send)
+                self.display_gcode(gcode_display)
+                self.Disable_Function()
             else:
                 current_time = datetime.now().strftime('%H:%M:%S')
                 self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!")
-            self.Disable_Function()
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
@@ -1041,13 +1057,14 @@ class Ui_MainWindow(object):
                     self.M_CurrentPos[1] = self.M_CurrentPos[1] + VAL
 
                 self.Y_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[1])))
-                gcode_send = "G0Y{:0=+06.1f}".format(VAL)
+                gcode_send = "G0Y{:0=+06.1f}".format(VAL*(200/8))
+                gcode_display = "G0Y{:0=+06.1f}".format(VAL)
                 self.send_to_arduino(gcode_send)
-                self.display_gcode(gcode_send)
+                self.display_gcode(gcode_display)
+                self.Disable_Function()
             else:
                 current_time = datetime.now().strftime('%H:%M:%S')
                 self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!")  
-            self.Disable_Function()
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
@@ -1077,13 +1094,14 @@ class Ui_MainWindow(object):
                     self.M_CurrentPos[1] = self.M_CurrentPos[1] + VAL
 
                 self.Y_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[1])))
-                gcode_send = "G0Y{:0=+06.1f}".format(VAL)
+                gcode_send = "G0Y{:0=+06.1f}".format(VAL*(200/8))
+                gcode_display = "G0Y{:0=+06.1f}".format(VAL)
                 self.send_to_arduino(gcode_send)
-                self.display_gcode(gcode_send)
+                self.display_gcode(gcode_display)
+                self.Disable_Function()
             else:
                 current_time = datetime.now().strftime('%H:%M:%S')
                 self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!")
-            self.Disable_Function()
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
@@ -1113,13 +1131,14 @@ class Ui_MainWindow(object):
                     self.M_CurrentPos[2] = self.M_CurrentPos[2] + VAL
 
                 self.Z_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[2])))
-                gcode_send = "G0Z{:0=+06.1f}".format(VAL)
+                gcode_send = "G0Z{:0=+06.1f}".format(VAL*(200/8))
+                gcode_display = "G0Z{:0=+06.1f}".format(VAL)
                 self.send_to_arduino(gcode_send)
-                self.display_gcode(gcode_send)
+                self.display_gcode(gcode_display)
+                self.Disable_Function()
             else:
                 current_time = datetime.now().strftime('%H:%M:%S')
                 self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!") 
-            self.Disable_Function()
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
@@ -1149,13 +1168,14 @@ class Ui_MainWindow(object):
                     self.M_CurrentPos[2] = self.M_CurrentPos[2] + VAL
 
                 self.Z_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[2])))
-                gcode_send = "G0Z{:0=+06.1f}".format(VAL)
+                gcode_send = "G0Z{:0=+06.1f}".format(VAL*(200/8))
+                gcode_display = "G0Z{:0=+06.1f}".format(VAL)
                 self.send_to_arduino(gcode_send)
-                self.display_gcode(gcode_send)
+                self.display_gcode(gcode_display)
+                self.Disable_Function()
             else:
                 current_time = datetime.now().strftime('%H:%M:%S')
                 self.Status_textBrowser.append(f"[{current_time}] Unable to move, exceed axis limit!!!")
-            self.Disable_Function()
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
@@ -1215,9 +1235,11 @@ class Ui_MainWindow(object):
             self.M_CurrentPos[2] = z_coord_v
 
             # Generate and send the G-code commands
-            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(x_ToMove, y_ToMove, z_ToMove)
+            steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, z_ToMove)
+            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(steps[0], steps[1], steps[2])
+            gcode_display = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(x_ToMove, y_ToMove, z_ToMove)
             self.send_to_arduino(gcode_send)
-            self.display_gcode(gcode_send)
+            self.display_gcode(gcode_display)
 
             # Set lineEdits for current position
             self.X_lineEdit.setText("{:.1f}".format(self.M_CurrentPos[0]))
@@ -1280,11 +1302,13 @@ class Ui_MainWindow(object):
             self.M_CurrentPos[1] = y_coord_v
             self.M_CurrentPos[2] = z_coord_v
 
-            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(x_ToMove, y_ToMove, z_ToMove)
+            steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, z_ToMove)
+            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(steps[0], steps[1], steps[2])
+            gcode_display = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(x_ToMove, y_ToMove, z_ToMove)
 
             if hasattr(self, 'ser') and self.ser.is_open:
                 self.send_to_arduino(gcode_send)
-                self.display_gcode(gcode_send)
+                self.display_gcode(gcode_display)
             else:
                 self.Status_textBrowser.append(datetime.now().strftime("[%H:%M:%S]: ")+"Error: Serial port is not open or command is empty")
 
@@ -1297,6 +1321,15 @@ class Ui_MainWindow(object):
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
 
+    def calculate_steps_to_move(self, x_ToMove, y_ToMove, z_ToMove):
+        
+        # Calculate the steps to move for each axis
+        Stp_To_Move = [0] * 3
+        Stp_To_Move[0] = x_ToMove * (200 / 8)
+        Stp_To_Move[1] = y_ToMove * (200 / 8)
+        Stp_To_Move[2] = z_ToMove * (200 / 8)
+    
+        return Stp_To_Move
 
     def send_to_arduino(self, gcode_send):
         if hasattr(self, 'ser') and self.ser.is_open:
