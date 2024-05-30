@@ -1,3 +1,4 @@
+
 #include <AccelStepper.h>
 #include <MultiStepper.h>
 
@@ -108,25 +109,13 @@ void loop() {
     if(Stp_To_Move[0] == 0 && Stp_To_Move[1] == 0 && Stp_To_Move[2] == 0 && Stp_To_Move[3] == 0)
     {
       delay(1000);
-      Serial.println("Done");
+      Serial.println("Ok");
     }
     else{ 
     Move_by_Distance(Stp_To_Move);
-    Serial.println("Done");
+    Serial.println("Ok");
     }
   }
-  else if (K == 'C') 
-  {
-    Serial.println("Calibrate");
-    delay(5000);
-    Serial.println("Done");
-  }
-  else if (K == 'S') 
-  {
-    Serial.println("Set Home");
-    Serial.println("Done");
-  }
-  Serial.println("Done");
   Reset_All();
 }
 char Serial_Read() 
@@ -136,10 +125,8 @@ char Serial_Read()
   while(Serial.available())
   {
     S_Flag = 1;
-    receivedString = Serial.readString();
-    Serial.println(receivedString);
+    receivedString = Serial.readString().until;
     function = receivedString[0];
-    Serial.println(function);
     if(function == 'G')
     {
       receivedString[0] = ' ';
@@ -149,9 +136,6 @@ char Serial_Read()
       Dist_To_Move[0] = receivedString.substring(X_pos + 1, Y_pos).toInt();
       Dist_To_Move[1] = receivedString.substring(Y_pos + 1, Z_pos).toInt();
       Dist_To_Move[2] = receivedString.substring(Z_pos + 1).toInt();
-      Serial.println( Dist_To_Move[0]);
-      Serial.println( Dist_To_Move[1]);
-      Serial.println( Dist_To_Move[2]);
       return function;
     }
     else if (function == 'C') 
