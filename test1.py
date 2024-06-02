@@ -32,6 +32,7 @@ class Ui_MainWindow(object):
         self.Machine_Max_LowerLim= [-205,-190,-60]
         self.M_HomePos = [0,0,0]
         #--------------# config widget 
+        self.MainWindow = MainWindow
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1029, 781)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -282,7 +283,7 @@ class Ui_MainWindow(object):
         self.label_10.setFont(font)
         self.label_10.setObjectName("label_10")
         self.Gcode_textBrowser = QtWidgets.QTextBrowser(self.tab)
-        self.Gcode_textBrowser.setGeometry(QtCore.QRect(520, 60, 291, 31))
+        self.Gcode_textBrowser.setGeometry(QtCore.QRect(520, 60, 300, 41))
         self.Gcode_textBrowser.setObjectName("Gcode_textBrowser")
         self.Load_pushButton = QtWidgets.QPushButton(self.tab)
         self.Load_pushButton.setGeometry(QtCore.QRect(520, 110, 93, 28))
@@ -291,6 +292,7 @@ class Ui_MainWindow(object):
         font.setPointSize(9)
         self.Load_pushButton.setFont(font)
         self.Load_pushButton.setObjectName("Load_pushButton")
+        self.Load_pushButton.clicked.connect(self.load_and_process_file)
         self.Delete_pushButton = QtWidgets.QPushButton(self.tab)
         self.Delete_pushButton.setGeometry(QtCore.QRect(620, 110, 93, 28))
         font = QtGui.QFont()
@@ -298,14 +300,7 @@ class Ui_MainWindow(object):
         font.setPointSize(9)
         self.Delete_pushButton.setFont(font)
         self.Delete_pushButton.setObjectName("Delete_pushButton")
-        self.Browse_pushButton = QtWidgets.QPushButton(self.tab)
-        self.Browse_pushButton.setGeometry(QtCore.QRect(720, 110, 93, 28))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(9)
-        self.Browse_pushButton.setFont(font)
-        self.Browse_pushButton.setObjectName("Browse_pushButton")
-        self.Browse_pushButton.clicked.connect(self.browse_file)
+        self.Delete_pushButton.clicked.connect(self.unload_file)
         self.tableView_4 = QtWidgets.QTableView(self.tab)
         self.tableView_4.setGeometry(QtCore.QRect(5, 160, 241, 271))
         self.tableView_4.setObjectName("tableView_4")
@@ -395,21 +390,9 @@ class Ui_MainWindow(object):
         self.listView = QtWidgets.QListView(self.tab)
         self.listView.setGeometry(QtCore.QRect(590, 440, 421, 261))
         self.listView.setObjectName("listView")
-        self.Gcode_tableWidget = QtWidgets.QTableWidget(self.tab)
-        self.Gcode_tableWidget.setGeometry(QtCore.QRect(600, 450, 401, 241))
-        self.Gcode_tableWidget.setObjectName("Gcode_tableWidget")
-        self.Gcode_tableWidget.setColumnCount(3)
-        self.Gcode_tableWidget.setRowCount(0)
-        item = QtWidgets.QTableWidgetItem()
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(9)
-        item.setFont(font)
-        self.Gcode_tableWidget.setHorizontalHeaderItem(0, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.Gcode_tableWidget.setHorizontalHeaderItem(1, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.Gcode_tableWidget.setHorizontalHeaderItem(2, item)
+        self.Command_textBrowser = QtWidgets.QTextBrowser(self.tab)
+        self.Command_textBrowser.setGeometry(QtCore.QRect(600, 480, 381, 211))
+        self.Command_textBrowser.setObjectName("Command_textBrowser")
         self.label_13 = QtWidgets.QLabel(self.tab)
         self.label_13.setGeometry(QtCore.QRect(720, 10, 191, 20))
         font = QtGui.QFont()
@@ -443,6 +426,15 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_15.setFont(font)
         self.label_15.setObjectName("label_15")
+        self.label_16 = QtWidgets.QLabel(self.tab)
+        self.label_16.setGeometry(QtCore.QRect(600, 450, 121, 16))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_16.setFont(font)
+        self.label_16.setObjectName("label_16")
         self.line_3 = QtWidgets.QFrame(self.tab)
         self.line_3.setGeometry(QtCore.QRect(700, 240, 20, 181))
         self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
@@ -531,16 +523,14 @@ class Ui_MainWindow(object):
         self.label_23 = QtWidgets.QLabel(self.tab)
         self.label_23.setGeometry(QtCore.QRect(170, 400, 70, 20))
         self.label_23.setObjectName("label_23")
-        self.Hold_pushButton = QtWidgets.QPushButton(self.tab)
-        self.Hold_pushButton.setGeometry(QtCore.QRect(260, 190, 71, 31))
+        self.Start_pushButton = QtWidgets.QPushButton(self.tab)
+        self.Start_pushButton.setGeometry(QtCore.QRect(720, 110, 93, 28))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(9)
-        self.Hold_pushButton.setFont(font)
-        self.Hold_pushButton.setObjectName("Hold_pushButton")
-        self.Start_pushButton = QtWidgets.QPushButton(self.tab)
-        self.Start_pushButton.setGeometry(QtCore.QRect(820, 59,71, 41))
+        self.Start_pushButton.setFont(font)
         self.Start_pushButton.setObjectName("Start_pushButton")
+        self.Start_pushButton.clicked.connect(self.start_processing)
         self.tableView.raise_()
         self.COM_comboBox.raise_()
         self.Baudrate_comboBox.raise_()
@@ -575,7 +565,6 @@ class Ui_MainWindow(object):
         self.Gcode_textBrowser.raise_()
         self.Load_pushButton.raise_()
         self.Delete_pushButton.raise_()
-        self.Browse_pushButton.raise_()
         self.tableView_4.raise_()
         self.label_11.raise_()
         self.label_12.raise_()
@@ -595,11 +584,12 @@ class Ui_MainWindow(object):
         self.Status_textBrowser.raise_()
         self.ClearMessage_pushButton.raise_()
         self.listView.raise_()
-        self.Gcode_tableWidget.raise_()
+        self.Command_textBrowser.raise_()
         self.label_13.raise_()
         self.label_14.raise_()
         self.photo.raise_()
         self.label_15.raise_()
+        self.label_16.raise_()
         self.line_3.raise_()
         self.label_18.raise_()
         self.ZOffset_doubleSpinBox.raise_()
@@ -612,7 +602,6 @@ class Ui_MainWindow(object):
         self.Acceleration_horizontalSlider.raise_()
         self.label_22.raise_()
         self.label_23.raise_()
-        self.Hold_pushButton.raise_()
         self.Start_pushButton.raise_()
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtWidgets.QWidget()
@@ -669,6 +658,7 @@ class Ui_MainWindow(object):
         self.timer1.timeout.connect(self.check_available)
         self.timer1.start(0)
 
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "CNC Control V1"))
@@ -715,7 +705,6 @@ class Ui_MainWindow(object):
         self.label_10.setText(_translate("MainWindow", "G-Code"))
         self.Load_pushButton.setText(_translate("MainWindow", "Load"))
         self.Delete_pushButton.setText(_translate("MainWindow", "Delete"))
-        self.Browse_pushButton.setText(_translate("MainWindow", "Browse"))
         self.label_11.setText(_translate("MainWindow", "Basic control"))
         self.label_12.setText(_translate("MainWindow", "Manual Command"))
         self.Send_pushButton.setText(_translate("MainWindow", "Send"))
@@ -730,15 +719,10 @@ class Ui_MainWindow(object):
         self.AllEnabled_pushButton.setText(_translate("MainWindow", "Enabled All"))
         self.label_9.setText(_translate("MainWindow", "Status"))
         self.ClearMessage_pushButton.setText(_translate("MainWindow", "Clear Message"))
-        item = self.Gcode_tableWidget.horizontalHeaderItem(0)
-        item.setText(_translate("MainWindow", "Status"))
-        item = self.Gcode_tableWidget.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Line"))
-        item = self.Gcode_tableWidget.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "G code"))
         self.label_13.setText(_translate("MainWindow", "By Nguyen Hoang Khang "))
         self.label_14.setText(_translate("MainWindow", "EEACIU19015 - HCMIU"))
         self.label_15.setText(_translate("MainWindow", "Offset"))
+        self.label_16.setText(_translate("MainWindow", "List Command"))
         self.label_18.setText(_translate("MainWindow", "Z offset:"))
         self.label_19.setText(_translate("MainWindow", "Offset position"))
         self.Save_pushButton.setText(_translate("MainWindow", "Save"))
@@ -746,7 +730,6 @@ class Ui_MainWindow(object):
         self.label_21.setText(_translate("MainWindow", "Acceleration:"))
         self.label_22.setText(_translate("MainWindow", "100, 100, 50"))
         self.label_23.setText(_translate("MainWindow", "200, 200"))
-        self.Hold_pushButton.setText(_translate("MainWindow", "Hold"))
         self.Start_pushButton.setText(_translate("MainWindow", "Start"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Interface"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "View"))
@@ -760,7 +743,7 @@ class Ui_MainWindow(object):
         self.actionSettings.setText(_translate("MainWindow", "Settings"))
 
     def exit_application(self):
-        self.close()
+        self.MainWindow.close()
         
     def detect_serial_port(self, arduino_port):
         ports = serial.tools.list_ports.comports()
@@ -813,22 +796,7 @@ class Ui_MainWindow(object):
     def clear_messages(self):
         # Clear the content of the SystemM_textBrowser
         self.Status_textBrowser.clear()
-    
-    def browse_file(self):
-        if self.Connect_pushButton.text() == "Disconnect":
-            options = QFileDialog.Options()
-            fileName, _ = QFileDialog.getOpenFileName(None, "Browse G-code file", "", "Text Files (*.txt);;All Files (*)", options=options)
-            if fileName:
-                print(f"Selected file: {fileName}")
-                current_time = datetime.now().strftime('%H:%M:%S')  # Get the current time
-                self.Gcode_textBrowser.append(f"{fileName}")
-            else:
-                print("File selection canceled")
-                current_time = datetime.now().strftime('%H:%M:%S')  # Get the current time
-                self.Status_textBrowser.append(f"[{current_time}]File selection canceled")  
-        else:
-            current_time = datetime.now().strftime('%H:%M:%S')
-            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")   
+       
     def X_Home(self):
         if self.Connect_pushButton.text() == "Disconnect":
             self.IsMoving = 1
@@ -937,6 +905,8 @@ class Ui_MainWindow(object):
             z_ToMove = z_coord_v - float(self.M_CurrentPos[2])
 
             self.M_CurrentPos[0] = x_coord_v
+
+            
             self.M_CurrentPos[1] = y_coord_v
             self.M_CurrentPos[2] = z_coord_v
 
@@ -1440,6 +1410,100 @@ class Ui_MainWindow(object):
                 self.Enable_Function()
                 self.IsMoving = 0
 
+
+                 
+
+    def load_and_process_file(self):
+        if self.Connect_pushButton.text() == "Disconnect":
+            options = QFileDialog.Options()
+            fileName, _ = QFileDialog.getOpenFileName(None, "Load G-code file", "", "Text Files (*.txt);;All Files (*)", options=options)
+            if fileName:
+                with open(fileName, 'r') as file:
+                    lines = file.readlines()
+                    gcode_commands = [line.strip() for line in lines if line.startswith('G0')]
+                self.Command_textBrowser.clear()  # Clear any existing content
+                for command in gcode_commands:
+                    self.Command_textBrowser.append(command)
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] Loaded G-code file")
+                self.Gcode_textBrowser.append(f"{fileName}")
+                self.gcode_commands = gcode_commands
+            else:
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] File selection canceled")
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+
+        
+    def unload_file(self):
+        if self.Connect_pushButton.text() == "Disconnect":
+            self.Gcode_textBrowser.clear()
+            self.Command_textBrowser.clear()
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Unloaded the file")
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+   
+
+    def start_processing(self):
+        if self.Connect_pushButton.text() == "Disconnect":
+            self.IsMoving = 1
+            if not hasattr(self, 'gcode_commands'):
+                print("No G-code commands loaded")
+                return
+            
+            self.current_command_index = 0
+
+            self.timer = QTimer()
+            self.timer.timeout.connect(self.process_next_command)
+            self.timer.start(1000)  
+
+    def process_next_command(self):
+        if self.current_command_index < len(self.gcode_commands):
+            command = self.gcode_commands[self.current_command_index]
+            self.current_command_index += 1
+            steps = self.convert_command_to_steps(command)
+            gcode_send = "G0X{:0=+06.1f}Y{:0=+06.1f}Z{:0=+06.1f}".format(steps[0], steps[1], steps[2])
+            self.send_to_arduino(gcode_send)
+
+    def convert_command_to_steps(self, command):
+        x_ToMove, y_ToMove, z_ToMove = 0, 0, 0 
+        if 'X' in command:
+            x_index = command.index('X') + 1
+            x_str = ''
+            while x_index < len(command) and (command[x_index].isdigit() or command[x_index] == '.' or command[x_index] == '-'):
+                x_str += command[x_index]
+                x_index += 1
+            if x_str:
+                x_ToMove = float(x_str)
+
+        if 'Y' in command:
+            y_index = command.index('Y') + 1
+            y_str = ''
+            while y_index < len(command) and (command[y_index].isdigit() or command[y_index] == '.' or command[y_index] == '-'):
+                y_str += command[y_index]
+                y_index += 1
+            if y_str:
+                y_ToMove = float(y_str)
+
+        if 'Z' in command:
+            z_index = command.index('Z') + 1
+            z_str = ''
+            while z_index < len(command) and (command[z_index].isdigit() or command[z_index] == '.' or command[z_index] == '-'):
+                z_str += command[z_index]
+                z_index += 1
+            if z_str:
+                z_ToMove = float(z_str)
+
+        steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, z_ToMove)
+        return steps
+        
+
+
+
+    
     def Disable_Function(self):
         self.tab.setEnabled(False)
 
