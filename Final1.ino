@@ -137,7 +137,8 @@ void Move_by_Distance(long int Step[])
   y2_axis.setCurrentPosition(0);
   z_axis.setCurrentPosition(0);
   steppers.moveTo(Step);
-  steppers.runSpeedToPosition();
+  while (steppers.run() and IS_EM_Button_Pressed == false);
+  
 }
 
 void CalibrateX() {
