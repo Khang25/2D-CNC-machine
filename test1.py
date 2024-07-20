@@ -1,9 +1,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QWidget
 import serial
 import serial.tools.list_ports
 from datetime import datetime
 from PyQt5.QtCore import QTimer
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+import matplotlib.pyplot as plt
 
 DegValidator = QtGui.QDoubleValidator(
                 -9999.0, # bottom
@@ -24,11 +26,15 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         # config interface
         self.IsMoving = 0
-        self.IsAllMoving = 0
         self.IsMoving_1 = 0
-        self.AdjustFlag = 0
         self.displacement = [0,0]
-        self.Move_Flag = 0
+        self.Zoffset = 0
+        self.Is_Move_Frame = 0
+        self.current_command_index = 0
+        self.Z_Current_State = 0
+        self.widget = QWidget
+        self.x_coords = []
+        self.y_coords = []
         self.Zoffset = 0
         self.current_command_index = 0
         self.previous_x = 0
@@ -38,6 +44,9 @@ class Ui_MainWindow(object):
         self.M_CurrentPos = [0, 0, 0]
         self.Machine_Max_UpperLim = [205,190]
         self.Machine_Max_LowerLim= [-205,-190]
+        self.Current_X_Gcode = 0
+        self.Current_Y_Gcode = 0
+
         
         #--------------# config widget 
         self.MainWindow = MainWindow
@@ -48,6 +57,8 @@ class Ui_MainWindow(object):
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
         self.tabWidget.setGeometry(QtCore.QRect(0, 0, 1021, 741))
         self.tabWidget.setObjectName("tabWidget")
+        self.tab_2 = QtWidgets.QWidget()
+        self.tab_2.setObjectName("tab_2")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
         self.COM_comboBox = QtWidgets.QComboBox(self.tab)
@@ -59,7 +70,6 @@ class Ui_MainWindow(object):
         font.setPointSize(9)
         self.Baudrate_comboBox.setFont(font)
         self.Baudrate_comboBox.setObjectName("Baudrate_comboBox")
-        self.Baudrate_comboBox.addItem("")
         self.Baudrate_comboBox.addItem("")
         self.label = QtWidgets.QLabel(self.tab)
         self.label.setGeometry(QtCore.QRect(10, 10, 161, 21))
@@ -326,7 +336,7 @@ class Ui_MainWindow(object):
         self.Move_pushButton.setFont(font)
         self.Move_pushButton.setObjectName("Move_pushButton")
         self.textBrowser_2 = QtWidgets.QTextBrowser(self.tab)
-        self.textBrowser_2.setGeometry(QtCore.QRect(5, 440, 581, 261))
+        self.textBrowser_2.setGeometry(QtCore.QRect(5, 440, 1006, 261))
         self.textBrowser_2.setObjectName("textBrowser_2")
         self.All_Calibrate_pushButton = QtWidgets.QPushButton(self.tab)
         self.All_Calibrate_pushButton.setGeometry(QtCore.QRect(70, 300, 93, 28))
@@ -341,20 +351,17 @@ class Ui_MainWindow(object):
         self.label_9.setFont(font)
         self.label_9.setObjectName("label_9")
         self.Status_textBrowser = QtWidgets.QTextBrowser(self.tab)
-        self.Status_textBrowser.setGeometry(QtCore.QRect(14, 480, 566, 211))
+        self.Status_textBrowser.setGeometry(QtCore.QRect(14, 480, 991, 211))
         self.Status_textBrowser.setObjectName("Status_textBrowser")
         self.ClearMessage_pushButton = QtWidgets.QPushButton(self.tab)
-        self.ClearMessage_pushButton.setGeometry(QtCore.QRect(460, 450, 121, 28))
+        self.ClearMessage_pushButton.setGeometry(QtCore.QRect(885, 450, 121, 28))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(9)
         self.ClearMessage_pushButton.setFont(font)
         self.ClearMessage_pushButton.setObjectName("ClearMessage_pushButton")
-        self.listView = QtWidgets.QListView(self.tab)
-        self.listView.setGeometry(QtCore.QRect(590, 440, 421, 261))
-        self.listView.setObjectName("listView")
-        self.Command_textBrowser = QtWidgets.QTextBrowser(self.tab)
-        self.Command_textBrowser.setGeometry(QtCore.QRect(600, 480, 381, 211))
+        self.Command_textBrowser = QtWidgets.QTextBrowser(self.tab_2)
+        self.Command_textBrowser.setGeometry(QtCore.QRect(690, 330, 301, 341))
         self.Command_textBrowser.setObjectName("Command_textBrowser")
         self.label_13 = QtWidgets.QLabel(self.tab)
         self.label_13.setGeometry(QtCore.QRect(720, 10, 191, 20))
@@ -375,9 +382,9 @@ class Ui_MainWindow(object):
         self.label_14.setFont(font)
         self.label_14.setObjectName("label_14")
         self.photo = QtWidgets.QLabel(self.tab)
-        self.photo.setGeometry(QtCore.QRect(920, 10, 61, 61))
+        self.photo.setGeometry(QtCore.QRect(930, 20, 61, 61))
         self.photo.setText("")
-        self.photo.setPixmap(QtGui.QPixmap("logoIU.png"))
+        self.photo.setPixmap(QtGui.QPixmap("logo.png"))
         self.photo.setScaledContents(True)
         self.photo.setObjectName("photo")
         self.label_15 = QtWidgets.QLabel(self.tab)
@@ -389,15 +396,6 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_15.setFont(font)
         self.label_15.setObjectName("label_15")
-        self.label_16 = QtWidgets.QLabel(self.tab)
-        self.label_16.setGeometry(QtCore.QRect(600, 450, 121, 16))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_16.setFont(font)
-        self.label_16.setObjectName("label_16")
         self.line_3 = QtWidgets.QFrame(self.tab)
         self.line_3.setGeometry(QtCore.QRect(700, 240, 20, 181))
         self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
@@ -532,7 +530,7 @@ class Ui_MainWindow(object):
         font.setWeight(60)
         self.label_26.setFont(font)
         self.SetHome_pushButton = QtWidgets.QPushButton(self.tab)
-        self.SetHome_pushButton.setGeometry(QtCore.QRect(820, 60, 73, 28))
+        self.SetHome_pushButton.setGeometry(QtCore.QRect(720, 110, 93, 28))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(9)
@@ -581,13 +579,11 @@ class Ui_MainWindow(object):
         self.label_9.raise_()
         self.Status_textBrowser.raise_()
         self.ClearMessage_pushButton.raise_()
-        self.listView.raise_()
         self.Command_textBrowser.raise_()
         self.label_13.raise_()
         self.label_14.raise_()
         self.photo.raise_()
         self.label_15.raise_()
-        self.label_16.raise_()
         self.line_3.raise_()
         self.label_18.raise_()
         self.ZOffset_lineEdit.raise_()
@@ -604,9 +600,84 @@ class Ui_MainWindow(object):
         self.label_24.raise_()
         self.label_25.raise_()
         self.label_26.raise_()
-        self.Start_pushButton.raise_()
         self.SetHome_pushButton.raise_()
-        self.tabWidget.addTab(self.tab, "")
+        self.tabWidget.addTab(self.tab, "")     
+        self.tab_2 = QtWidgets.QWidget()
+        self.tab_2.setObjectName("tab_2")
+        self.tableView_3 = QtWidgets.QTableView(self.tab_2)
+        self.tableView_3.setGeometry(QtCore.QRect(5, 10, 1001, 691))
+        self.tableView_3.setObjectName("tableView_3")
+        self.widget = QtWidgets.QWidget(self.tab_2)
+        self.widget.setGeometry(QtCore.QRect(10, 20, 661, 661))
+        font = QtGui.QFont()
+        font.setBold(False)
+        font.setUnderline(False)
+        font.setStrikeOut(False)
+        self.widget.setFont(font)
+        self.widget.setObjectName("widget")
+        self.Start_pushButton = QtWidgets.QPushButton(self.tab_2)
+        self.Start_pushButton.setGeometry(QtCore.QRect(680, 20, 93, 28))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(9)
+        self.Start_pushButton.setFont(font)
+        self.Start_pushButton.setObjectName("Start_pushButton")
+        self.Frame_pushButton = QtWidgets.QPushButton(self.tab_2)
+        self.Frame_pushButton.setGeometry(QtCore.QRect(780, 20, 93, 28))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(9)
+        self.Frame_pushButton.setFont(font)
+        self.Frame_pushButton.setObjectName("Frame_pushButton")
+        self.listView = QtWidgets.QListView(self.tab_2)
+        self.listView.setGeometry(QtCore.QRect(680, 350, 321, 331))
+        self.listView.setObjectName("listView")
+        self.Command_textBrowser = QtWidgets.QTextBrowser(self.tab_2)
+        self.Command_textBrowser.setGeometry(QtCore.QRect(690, 390, 301, 281))
+        self.Command_textBrowser.setObjectName("Command_textBrowser")
+        self.label_16 = QtWidgets.QLabel(self.tab_2)
+        self.label_16.setGeometry(QtCore.QRect(690, 360, 121, 16))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setUnderline(False)
+        font.setStrikeOut(False)
+        self.label_16.setFont(font)
+        self.label_16.setObjectName("label_16")
+        self.ClearMessage_pushButton_2 = QtWidgets.QPushButton(self.tab_2)
+        self.ClearMessage_pushButton_2.setGeometry(QtCore.QRect(870, 70, 121, 28))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(9)
+        self.ClearMessage_pushButton_2.setFont(font)
+        self.ClearMessage_pushButton_2.setObjectName("ClearMessage_pushButton_2")
+        self.label_17 = QtWidgets.QLabel(self.tab_2)
+        self.label_17.setGeometry(QtCore.QRect(690, 60, 71, 16))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        self.label_17.setFont(font)
+        self.label_17.setObjectName("label_17")
+        self.listView_2 = QtWidgets.QListView(self.tab_2)
+        self.listView_2.setGeometry(QtCore.QRect(680, 50, 321, 291))
+        self.listView_2.setObjectName("listView_2")
+        self.Status_textBrowser_2 = QtWidgets.QTextBrowser(self.tab_2)
+        self.Status_textBrowser_2.setGeometry(QtCore.QRect(690, 100, 301, 231))
+        self.Status_textBrowser_2.setObjectName("Status_textBrowser_2")
+        self.tableView_3.raise_()
+        self.widget.raise_()
+        self.Start_pushButton.raise_()
+        self.listView.raise_()
+        self.Command_textBrowser.raise_()
+        self.listView_2.raise_()
+        self.Status_textBrowser_2.raise_()
+        self.ClearMessage_pushButton_2.raise_()
+        self.label_16.raise_()
+        self.label_17.raise_()
+        self.Frame_pushButton.raise_()
+        self.tabWidget.addTab(self.tab_2, "")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1029, 26))
@@ -631,6 +702,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuFILE.menuAction())
         self.menubar.addAction(self.menuTools.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
+        
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
@@ -664,6 +736,7 @@ class Ui_MainWindow(object):
         self.Y_Calibrate_pushButton.clicked.connect(self.calibrate_Y)
         self.All_Calibrate_pushButton.clicked.connect(self.calibrate_All)
         self.SetHome_pushButton.clicked.connect(self.Set_Home)
+        self.Frame_pushButton.clicked.connect(self.frame)
     #---------------------CHECK MESSAGE---------#
         #timer
         self.timer1 = QTimer(self.tab)
@@ -673,9 +746,8 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "CNC Control V1"))
-        self.Baudrate_comboBox.setItemText(0, _translate("MainWindow", "9600"))
-        self.Baudrate_comboBox.setItemText(1, _translate("MainWindow", "115200"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "CNC Controller"))
+        self.Baudrate_comboBox.setItemText(0, _translate("MainWindow", "115200"))
         self.label.setText(_translate("MainWindow", "Serial Configuration"))
         self.label_2.setText(_translate("MainWindow", "COM:"))
         self.label_3.setText(_translate("MainWindow", "Baudrate:"))
@@ -731,9 +803,14 @@ class Ui_MainWindow(object):
         self.label_24.setText(_translate("MainWindow", "IncVal:"))
         self.label_25.setText(_translate("MainWindow", "mm"))
         self.label_26.setText(_translate("MainWindow", "mm"))
-        self.Start_pushButton.setText(_translate("MainWindow", "Start"))
         self.SetHome_pushButton.setText(_translate("MainWindow", "Set Home"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Interface"))
+        self.Start_pushButton.setText(_translate("MainWindow", "Start"))
+        self.Frame_pushButton.setText(_translate("MainWindow", "Frame"))
+        self.label_16.setText(_translate("MainWindow", "List command"))
+        self.ClearMessage_pushButton_2.setText(_translate("MainWindow", "Clear Message"))
+        self.label_17.setText(_translate("MainWindow", "Status 2"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "G Code "))
         self.menuFILE.setTitle(_translate("MainWindow", "File"))
         self.menuTools.setTitle(_translate("MainWindow", "Tools"))
         self.menuHelp.setTitle(_translate("MainWindow", "Help"))
@@ -749,7 +826,7 @@ class Ui_MainWindow(object):
         ports = serial.tools.list_ports.comports()
         available_ports = [port.device for port in ports]
         return arduino_port in available_ports
-
+    
     def connect_or_disconnect(self):
         arduino_port = str(self.COM_comboBox.currentText())
         baudrate = int(self.Baudrate_comboBox.currentText())
@@ -800,7 +877,7 @@ class Ui_MainWindow(object):
         try:
             if self.ser.in_waiting > 0:
                 data = self.ser.readline().decode().strip()
-                if data == 'Ok':
+                if data == 'Ok' or data == 'EB':
                     return data
         except serial.SerialException as e:
             print(f"Failed to read from serial port: {e}")
@@ -809,8 +886,7 @@ class Ui_MainWindow(object):
     def check_available(self):
         if self.Connect_pushButton.text() == "Disconnect":
             data = self.read_from_serial_port()
-            if data is not None and data.strip() == 'Ok' and self.IsMoving == 1:  # Check if 'Ok' message is received
-                self.current_command_index += 1        
+            if data is not None and data.strip() == 'Ok' and self.IsMoving == 1:  # Check if 'Ok' message is received     
                 if self.current_command_index < len(self.gcode_commands):
                     self.process_next_command()
                 else: 
@@ -819,12 +895,28 @@ class Ui_MainWindow(object):
             elif data is not None and data.strip() == 'Ok' and self.IsMoving_1 == 1:  # Check if 'Ok' message is received
                     self.Enable_Function()
                     self.IsMoving_1 = 1
+            elif data is not None and data.strip() == 'Ok' and self.Is_Move_Frame == 1:  # Check if 'Ok' message is received
+                if self.edge_index < len(self.rect_coords):
+                    print("Send " + str(self.edge_index)+ "line")
+                    self.draw_next_edge()
+
+                else:
+                    self.Is_Move_Frame = 0
+                    self.Enable_Function()
+                    self.remove_frame()
+                    
+
+            if data is not None and data.strip() == 'EB':
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] ALLERT !!! EMERGENCY BUTTON PRESSED !!!")
+
 
     def start_processing(self):
         if self.Connect_pushButton.text() == "Disconnect":
             self.IsMoving = 1
             if len(self.gcode_commands) == 0:
-                print("No G-code commands loaded")
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] No G-code commands loaded")
                 return
             self.current_command_index  = 0
             self.process_next_command()
@@ -833,20 +925,69 @@ class Ui_MainWindow(object):
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
 
+    def extract_coordinates(self, command):
+        # Define start and end position of X and Y in list G-code
+        x_start = command.find('X') + 1
+        x_end = command.find('Y')
+        y_start = command.find('Y') + 1
+        y_end = command.find('Z') if 'Z' in command else len(command)
+
+        # Take out the value of X and Y from list G-code
+        x = float(command[x_start:x_end]) if x_start < x_end else 0.0
+        y = float(command[y_start:y_end]) if y_start < y_end else 0.0
+
+        return x, y
+    
+    def update_current_position(self):
+        # Take the last G-code line
+        if self.current_command_index > 0:
+            last_command = self.gcode_commands[self.current_command_index - 1]
+            x_mm, y_mm = self.extract_coordinates(last_command)
+            self.M_CurrentPos[0] = x_mm
+            self.M_CurrentPos[1] = y_mm
+
+    def plot_coordinates(self, command):
+        # Extract X and Y coordinates from the command
+        x_start = command.find('X') + 1
+        x_end = command.find('Y')
+        y_start = command.find('Y') + 1
+        y_end = command.find('Z') if 'Z' in command else len(command)
+
+        if x_start != -1 and x_end != -1 and y_start != -1 and (y_end != -1 or 'Z' not in command):
+            try:
+                x = float(command[x_start:x_end])
+                y = float(command[y_start:y_end])
+
+                # Clear the previous marker
+                if hasattr(self, 'marker') and self.marker:
+                    self.marker.remove()
+
+                # Add the red '+' marker at the new position
+                self.marker, = self.ax.plot(x, y, marker='+', color='red', markersize=20)
+                self.fig.canvas.draw()
+
+            except ValueError:
+                pass
+
+                    
     def process_next_command(self):
-        if self.current_command_index < len(self.gcode_commands):
+        if self.current_command_index < len(self.gcode_commands) and self.IsMoving == 1:
             command = self.gcode_commands[self.current_command_index]
             steps = self.convert_command_to_steps_1(command)
             if command[1] == '0':
                 if self.Z_Current_State == 0:
                     ZtoMove = 0
                 else:
-                    ZtoMove = - (self.Zoffset)
+                    ZtoMove = -self.Zoffset
                     self.Z_Current_State = 0
-                
+
                 gcode_send = "G0X{:0=+}Y{:0=+}Z{:0=+}".format(steps[0], steps[1], (ZtoMove))
                 self.send_to_arduino(gcode_send)
                 self.display_gcode(gcode_send)
+                # Simulate movement by updating plot position
+                x = steps[0]
+                y = steps[1]
+
             elif command[1] == '1':
                 if self.Z_Current_State == 0:
                     ZtoMove = self.Zoffset
@@ -854,11 +995,17 @@ class Ui_MainWindow(object):
                 else:
                     ZtoMove = 0
 
-                gcode_send = "G1X{:0=+}Y{:0=+}Z{:0=+}".format(steps[0], steps[1], (ZtoMove))
+                gcode_send = "G0X{:0=+}Y{:0=+}Z{:0=+}".format(steps[0], steps[1], (ZtoMove))
                 self.send_to_arduino(gcode_send)
                 self.display_gcode(gcode_send)
-                    
-    
+                # Simulate movement by updating plot position
+                x = steps[0]
+                y = steps[1]
+            self.plot_coordinates(command)
+            self.current_command_index += 1
+            if self.current_command_index == len(self.gcode_commands):
+                self.update_current_position()
+                
     def Set_Home(self):
         print([self.M_CurrentPos[0],self.M_CurrentPos[1]])
         self.displacement[0] = self.M_CurrentPos[0]
@@ -867,22 +1014,22 @@ class Ui_MainWindow(object):
     def convert_command_to_steps_1(self, command):
         x_coord_v = self.get_coord_value(command, 'X', self.M_CurrentPos[0])
         y_coord_v = self.get_coord_value(command, 'Y', self.M_CurrentPos[1])
-
         # Limit coordinate value
         x_coord_v = min(max(x_coord_v, self.Machine_Max_LowerLim[0]), self.Machine_Max_UpperLim[0])
         y_coord_v = min(max(y_coord_v, self.Machine_Max_LowerLim[1]), self.Machine_Max_UpperLim[1])
 
+
         # Calculate steps to move
-        x_ToMove = x_coord_v - self.displacement[0]  
-        y_ToMove = y_coord_v - self.displacement[1] 
+        x_ToMove = x_coord_v + self.displacement[0]  - self.M_CurrentPos[0]
+        y_ToMove = y_coord_v + self.displacement[1]  - self.M_CurrentPos[1]
 
-        # Update new home position
-        self.displacement[0] = x_coord_v
-        self.displacement[1] = y_coord_v
 
+        # Cập nhật vị trí gốc mới    
+        self.M_CurrentPos[0] = x_coord_v + self.displacement[0]
+        self.M_CurrentPos[1] = y_coord_v + self.displacement[1]
         # Set lineEdits for current position
-        self.X_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[0] + self.displacement[0]))
-        self.Y_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[1] + self.displacement[1]))
+        self.X_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[0]))
+        self.Y_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[1]))
 
         steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, 0.0)
         return steps
@@ -891,37 +1038,85 @@ class Ui_MainWindow(object):
     def load_and_process_file(self):
         if self.Connect_pushButton.text() == "Disconnect":
             options = QFileDialog.Options()
-            fileName, _ = QFileDialog.getOpenFileName(None, "Load G-code file", "", "Text Files (*.txt);;All Files (*)", options=options)
+            fileName, _ = QFileDialog.getOpenFileName(None, "Load G-code file", "", 
+                                                    "G-Code Files (*.ngc);;Text Files (*.txt);;All Files (*)", options=options)
             if fileName:
                 with open(fileName, 'r') as file:
                     lines = file.readlines()
-                    gcode_commands = [line.strip() for line in lines if line.startswith('G')]
-                self.Command_textBrowser.clear()  # Clear any existing content
-                for command in gcode_commands:
-                    self.Command_textBrowser.append(command)
-                current_time = datetime.now().strftime('%H:%M:%S')
-                self.Status_textBrowser.append(f"[{current_time}] Loaded G-code file")
-                self.Gcode_textBrowser.append(f"{fileName}")
-                self.gcode_commands = gcode_commands
-                print(self.gcode_commands)
+                    gcode_commands = []
+                    current_x, current_y = 0.0, 0.0
+
+                    for line in lines:
+                        line = line.strip()
+                        if line.startswith('G'):
+                            if 'Z' in line:
+                                continue  # Skip lines containing Z coordinates
+                            if line.startswith('G1') or line.startswith('G0'):
+                                x_end = self.get_coord_value(line, 'X', current_x)
+                                y_end = self.get_coord_value(line, 'Y', current_y)
+                                if line.startswith('G1'):
+                                    segments = self.interpolate(current_x, current_y, x_end, y_end)
+                                    for x, y in segments:
+                                        gcode_commands.append(f"G1 X {x:.3f} Y {y:.3f}")
+                                else:  # G0 command
+                                    line = ' '.join(line.split())  # Clean up multiple spaces
+                                    gcode_commands.append(line)
+                                current_x, current_y = x_end, y_end
+
+                    # Clear and populate the Command_textBrowser with G-code commands
+                    self.Command_textBrowser.clear()
+                    for command in gcode_commands:
+                        self.Command_textBrowser.append(command)
+
+                    # Update status and display loaded file name in the GUI
+                    current_time = datetime.now().strftime('%H:%M:%S')
+                    self.Status_textBrowser.append(f"[{current_time}] Loaded G-code file")
+                    self.Status_textBrowser_2.append(f"[{current_time}] Loaded G-code file")
+                    self.Gcode_textBrowser.append(f"{fileName}")
+
+                    # Store the loaded G-code commands in self.gcode_commands for further processing
+                    self.gcode_commands = gcode_commands
+                    print(self.gcode_commands)  # Optional: Print the loaded G-code commands
+                    self.plot_gcode_commands(self.gcode_commands)
+
             else:
+                # Inform user if no file was selected
                 current_time = datetime.now().strftime('%H:%M:%S')
                 self.Status_textBrowser.append(f"[{current_time}] No file selected")
         else:
+            # Inform user if Arduino is not connected
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
-
 
     def unload_file(self):
         if self.Connect_pushButton.text() == "Disconnect":
             self.Gcode_textBrowser.clear()
             self.Command_textBrowser.clear()
             self.gcode_commands.clear()
+            self.clear_plot_on_tab2()
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Unloaded the file")
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+
+    def interpolate(self, x_start, y_start, x_end, y_end, max_segment_length=0.2):
+        distance = ((x_end - x_start) ** 2 + (y_end - y_start) ** 2) ** 0.5
+        num_segments = max(1, int(self.custom_round(distance / max_segment_length)))
+        
+        x_segments = [(x_start + i * (x_end - x_start) / num_segments) for i in range(1, num_segments + 1)]
+        y_segments = [(y_start + i * (y_end - y_start) / num_segments) for i in range(1, num_segments + 1)]
+        
+        # Adjust the last segment if it's smaller than max_segment_length
+        if num_segments > 1:
+            last_segment_length = ((x_segments[-1] - x_segments[-2]) ** 2 + (y_segments[-1] - y_segments[-2]) ** 2) ** 0.5
+            if last_segment_length < max_segment_length:
+                x_segments[-2] = x_end
+                y_segments[-2] = y_end
+                x_segments.pop(-1)
+                y_segments.pop(-1)
+        
+        return list(zip(x_segments, y_segments))
 
     def move_Z_positive(self):
         if self.Connect_pushButton.text() == "Disconnect":
@@ -1007,7 +1202,7 @@ class Ui_MainWindow(object):
 
     def send_command(self):
         if self.Connect_pushButton.text() == "Disconnect":
-            self.IsMoving = 1
+            self.IsMoving_1 = 1
             command = self.ManualCommand_lineEdit.text().strip().upper()
             command = command.replace(" ", "")
             
@@ -1064,12 +1259,22 @@ class Ui_MainWindow(object):
                 return float(coord_str)
         return current_value
     
+    def custom_round(self, float_number):
+        integer_part = int(float_number)
+        decimal_part = abs(float_number - integer_part)
+        if decimal_part >= 0.5:
+            return integer_part + (1 if float_number >= 0 else -1)
+        else:
+            return integer_part
+
     def calculate_steps_to_move(self, x_ToMove, y_ToMove, z_ToMove):
         # Calculate the steps to move for each axis
         Stp_To_Move = [0] * 3
         Stp_To_Move[0] = self.custom_round(x_ToMove * (400 / 8))
         Stp_To_Move[1] = self.custom_round(y_ToMove * (400 / 8))
         Stp_To_Move[2] = self.custom_round(z_ToMove * (400 / 8))
+        return Stp_To_Move
+
 
         return Stp_To_Move
 
@@ -1102,7 +1307,7 @@ class Ui_MainWindow(object):
 
     def X_Home(self):
         if self.Connect_pushButton.text() == "Disconnect":
-            self.IsMoving = 1
+            self.IsMoving_1 = 1
             x_coord_v = 0.000 
             y_coord_v = self.M_CurrentPos[1]
 
@@ -1114,8 +1319,8 @@ class Ui_MainWindow(object):
 
             # Generate the G-code command
             steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, 0.0)
-            gcode_send = "G0X{:0=+}Y{:0=+}".format(steps[0], steps[1])
-            gcode_display = "G0X{:0=+}Y{:0=+}".format(x_ToMove, y_ToMove)
+            gcode_send = "G0X{:0=+}".format(steps[0])
+            gcode_display = "G0X{:0=+}".format(steps[0])
             # Send the G-code to Arduino 
             self.send_to_arduino(gcode_send)
             self.display_gcode(gcode_display)
@@ -1129,7 +1334,7 @@ class Ui_MainWindow(object):
 
     def Y_Home(self):
         if self.Connect_pushButton.text() == "Disconnect":
-            self.IsMoving = 1
+            self.IsMoving_1 = 1
             x_coord_v = self.M_CurrentPos[0]
             y_coord_v = 0.000
 
@@ -1141,8 +1346,8 @@ class Ui_MainWindow(object):
 
             # Generate the G-code command
             steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, 0.0)
-            gcode_send = "G0X{:0=+}Y{:0=+}".format(steps[0], steps[1])
-            gcode_display = "G0X{:0=+}Y{:0=+}".format(x_ToMove, y_ToMove)
+            gcode_send = "G0Y{:0=+}".format(steps[1])
+            gcode_display = "G0Y{:0=+}".format(steps[1])
             # Send the G-code to Arduino 
             self.send_to_arduino(gcode_send)
             self.display_gcode(gcode_display)
@@ -1156,7 +1361,7 @@ class Ui_MainWindow(object):
 
     def Home_All(self):
         if self.Connect_pushButton.text() == "Disconnect":
-            self.IsMoving = 1
+            self.IsMoving_1 = 1
             # Get the values from the lineEdits
             x_coord_v = 0.000
             y_coord_v = 0.000 
@@ -1170,7 +1375,7 @@ class Ui_MainWindow(object):
             # Generate the G-code command
             steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, 0.0)
             gcode_send = "G0X{:0=+}Y{:0=+}".format(steps[0], steps[1])
-            gcode_display = "G0X{:0=+}Y{:0=+}".format(x_ToMove, y_ToMove)
+            gcode_display = "G0X{:0=+}Y{:0=+}".format(steps[0], steps[1])
             # Send the G-code to Arduino 
             self.send_to_arduino(gcode_send)
             self.display_gcode(gcode_display)
@@ -1185,7 +1390,7 @@ class Ui_MainWindow(object):
             
     def move_X_positive(self):
         if self.Connect_pushButton.text() == "Disconnect":
-            self.IsMoving = 1
+            self.IsMoving_1 = 1
             if self.M_CurrentPos[0] < self.Machine_Max_UpperLim[0]:
                 VAL = 0.0
                 if self.Hundred_radioButton.isChecked():
@@ -1223,7 +1428,7 @@ class Ui_MainWindow(object):
 
     def move_X_negative(self):
         if self.Connect_pushButton.text() == "Disconnect":
-            self.IsMoving = 1
+            self.IsMoving_1 = 1
             if self.M_CurrentPos[0] >  self.Machine_Max_LowerLim[0]:
                 VAL = 0.0
                 if self.Hundred_radioButton.isChecked():
@@ -1260,7 +1465,7 @@ class Ui_MainWindow(object):
 
     def move_Y_positive(self):
         if self.Connect_pushButton.text() == "Disconnect":
-            self.IsMoving = 1
+            self.IsMoving_1 = 1
             if self.M_CurrentPos[1] < self.Machine_Max_UpperLim[1]:
                 VAL = 0.0
                 if self.Hundred_radioButton.isChecked():
@@ -1297,7 +1502,7 @@ class Ui_MainWindow(object):
 
     def move_Y_negative(self):
         if self.Connect_pushButton.text() == "Disconnect":
-            self.IsMoving = 1
+            self.IsMoving_1 = 1
             if self.M_CurrentPos[1] >  self.Machine_Max_LowerLim[1]:
                 VAL = 0.0
                 if self.Hundred_radioButton.isChecked():
@@ -1331,14 +1536,6 @@ class Ui_MainWindow(object):
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
-    
-    def custom_round(self, float_number):
-        integer_part = int(float_number)
-        decimal_part = abs(float_number - integer_part)  # Taking the absolute value
-        if decimal_part < 0.5:
-            return integer_part
-        else:
-            return integer_part + 1
 
     def send_to_arduino(self, gcode_send):
         if hasattr(self, 'ser') and self.ser.is_open:
@@ -1355,6 +1552,17 @@ class Ui_MainWindow(object):
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+    
+    def display_gcode_2(self, gcode_command):
+        if hasattr(self, 'ser') and self.ser.is_open:
+            try:
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser_2.append(f"[{current_time}] Sent: {gcode_command}")
+            except Exception as e:
+                self.Status_textBrowser_2.append(f"Error sending command: {e}")
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser_2.append(f"[{current_time}] Arduino not connected")
         
     def update_speed_label(self):
         if self.Connect_pushButton.text() == "Disconnect":
@@ -1434,29 +1642,140 @@ class Ui_MainWindow(object):
             except Exception as e:
                 self.Status_textBrowser.append(f"Error sending acceleration command: {e}")
 
-    def linear_interpolate(self, X1, Y1, X2, Y2):
-        m = (Y2 - Y1) / (X2 - X1)
-        b = Y1 - m * X1
-       
-        interpolated_points = []
-        
-        num_steps = int(max(abs(X2 - X1), abs(Y2 - Y1)) * 1)  
-        for i in range(num_steps + 1):
-            x = X1 + (X2 - X1) * i / num_steps
-            y = m * x + b
-            interpolated_points.append((x, y))
-  
-        return interpolated_points
-
     def display_distance_message(self, distance):
         current_time = datetime.now().strftime('%H:%M:%S')
         self.Status_textBrowser.append(f"[{current_time}] Distance set at {distance} mm")
 
     def Disable_Function(self):
         self.tab.setEnabled(False)
+        self.tab_2.setEnabled(False)
 
     def Enable_Function(self): 
         self.tab.setEnabled(True)
+        self.tab_2.setEnabled(True)
+
+    def plot_gcode_commands(self, gcode_commands):
+        # Clear any existing plot on tab 2
+        self.clear_plot_on_tab2()
+
+        self.x_coords = []
+        self.y_coords = []
+
+        for command in gcode_commands:
+            if command.startswith('G0') or command.startswith('G1'):
+                # Extract X and Y coordinates
+                x_start = command.find('X') + 1
+                x_end = command.find('Y')
+                y_start = command.find('Y') + 1
+                y_end = command.find('Z') if 'Z' in command else len(command)
+
+                # Check if X and Y coordinates are found and Z coordinate is not found
+                if x_start != -1 and x_end != -1 and y_start != -1 and (y_end != -1 or 'Z' not in command):
+                    try:
+                        x = float(command[x_start:x_end])
+                        y = float(command[y_start:y_end])
+
+                        self.x_coords.append(x)
+                        self.y_coords.append(y)
+                    except ValueError:
+                        continue
+
+        # Create plot using Matplotlib
+        self.fig, self.ax = plt.subplots()
+        self.ax.plot(self.x_coords, self.y_coords, marker='o', linestyle='-', color='black', markersize=3)
+        self.ax.set_xlabel('X')
+        self.ax.set_ylabel('Y')
+        self.ax.set_title('G-code Plot')
+        self.ax.grid(True)
+        self.fig.tight_layout()
+
+        # Initialize the red '+' marker at the initial position
+        if self.x_coords and self.y_coords:
+            self.marker, = self.ax.plot(self.x_coords[0], self.y_coords[0], marker='+', color='red', markersize=20)
+
+        # Create FigureCanvas and embed into the widget designed in Qt Creator
+        canvas = FigureCanvas(self.fig)
+        layout = self.widget.layout()  # Get the current layout of self.widget
+
+        if layout is None:
+            layout = QtWidgets.QVBoxLayout(self.widget)
+            self.widget.setLayout(layout)
+        else:
+            # Clear the layout and its widgets
+            self.clear_layout(layout)
+
+        layout.addWidget(canvas)
+
+    def clear_plot_on_tab2(self):
+        # Clear plot on tab 2 by removing the canvas widget
+        layout = self.widget.layout()
+        if layout:
+            self.clear_layout(layout)
+
+    def clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+    
+    def frame(self):
+        if not self.x_coords or not self.y_coords:
+            return
+
+        self.rect_lines = []
+
+        x_min, x_max = min(self.x_coords), max(self.x_coords)
+        y_min, y_max = min(self.y_coords), max(self.y_coords)
+      
+
+        # Coordinates of the rectangle edges
+        self.rect_coords = [
+            ((x_min, y_min), (x_min, y_max)),   # Left edge
+            ((x_min, y_max), (x_max, y_max)),   # Top edge
+            ((x_max, y_max), (x_max, y_min)),   # Right edge
+            ((x_max, y_min), (x_min, y_min))    # Bottom edge
+        ]
+        for i in  self.rect_coords:
+            print("line", i)
+        # Start drawing the rectangle edges one by one
+        self.edge_index = 0
+        self.timer = QTimer()
+        self.Is_Move_Frame = 1
+        self.draw_next_edge()
+        self.Disable_Function()
+        #self.timer.timeout.connect(self.draw_next_edge)
+        #self.timer.start(500)  # Draw each edge every second
+
+    def draw_next_edge(self):
+        if self.Connect_pushButton.text() == "Disconnect":
+            start, end = self.rect_coords[self.edge_index]
+            line, = self.ax.plot([start[0], end[0]], [start[1], end[1]], 'r-')
+            print("Point 1:" + str(start[0]) + "," + str(end[0]))
+            print("Point 2:" + str(start[1]) + "," + str(end[1]))
+            self.rect_lines.append(line)
+            self.fig.canvas.draw_idle()
+            self.edge_index += 1
+            steps = self.calculate_steps_to_move(end[0], end[1], 0.0)
+            gcode_send = "G0X{:0=+}Y{:0=+}".format(steps[0] + self.displacement[0] - self.M_CurrentPos[0], steps[1] + self.displacement[1] - self.M_CurrentPos[1])
+            self.M_CurrentPos[0] = steps[0]
+            self.M_CurrentPos[1] = steps[1]
+            gcode_display = "G0X{:0=+}Y{:0=+}".format(steps[0], steps[1])
+            # Send the G-code to Arduino 
+            self.send_to_arduino(gcode_send)
+            self.display_gcode_2(gcode_display)
+            self.Disable_Function()
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+            # tao bien current position moi(chi de plot thoi)
+    def remove_frame(self):
+        for line in self.rect_lines:
+            line.remove()
+        self.rect_lines = []
+        self.fig.canvas.draw_idle()
+
+
 
 if __name__ == "__main__":
     import sys
@@ -1466,3 +1785,4 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
+
