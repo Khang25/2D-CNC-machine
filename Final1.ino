@@ -25,7 +25,6 @@ volatile bool EM_Button_Pressed = false;
 // Define Buzzor
 const int Buzzor = 17;
 
-char Serial_Read();
 void Move_by_Distance(float Distance[]);
 
 int dirPin[4] = {dirPinX, dirPinY1, dirPinY2, dirPinZ};
@@ -137,7 +136,7 @@ void Move_by_Distance(long int Step[])
   y2_axis.setCurrentPosition(0);
   z_axis.setCurrentPosition(0);
   steppers.moveTo(Step);
-  while (steppers.run() and IS_EM_Button_Pressed == false);
+  while (steppers.run() and EM_Button_Pressed == false);
   
 }
 
@@ -161,9 +160,9 @@ void CalibrateX() {
   digitalWrite(dirPinX, LOW); 
   for (int x = 0; x < 500; x++) { 
     digitalWrite(stepPinX, HIGH);
-    delayMicroseconds(400);
+    delayMicroseconds(600);
     digitalWrite(stepPinX, LOW);
-    delayMicroseconds(400);
+    delayMicroseconds(600);
     if(EM_Button_Pressed)
     {
       return;
@@ -173,9 +172,9 @@ void CalibrateX() {
   digitalWrite(dirPinX, HIGH); 
   while (digitalRead(limitSwitchX) == HIGH) {
     digitalWrite(stepPinX, HIGH);
-    delayMicroseconds(400);
+    delayMicroseconds(600);
     digitalWrite(stepPinX, LOW);
-    delayMicroseconds(400);
+    delayMicroseconds(600);
     if(EM_Button_Pressed)
     {
       return;
@@ -202,86 +201,108 @@ void CalibrateX() {
 }
 
 void CalibrateY() {
-  Serial.println("Calibrating Y1 and Y2");
+  Serial.println("Calibrating Y1 and Y2...");
 
   digitalWrite(dirPinY1, LOW);
   digitalWrite(dirPinY2, LOW);
 
-  while (digitalRead(limitSwitchY1) == HIGH || digitalRead(limitSwitchY2) == HIGH) {
-    if(EM_Button_Pressed)
-    {
-      return;
+  bool y1AtLimit = false;
+  bool y2AtLimit = false;
+
+  while (!y1AtLimit || !y2AtLimit) {
+    if (!y1AtLimit) {
+      if (digitalRead(limitSwitchY1) == HIGH) {
+        digitalWrite(stepPinY1, HIGH);
+        delayMicroseconds(300);
+        digitalWrite(stepPinY1, LOW);
+        delayMicroseconds(300);
+      } else {
+        y1AtLimit = true;
+      }
     }
-    if (digitalRead(limitSwitchY1) == HIGH) {
-      digitalWrite(stepPinY1, HIGH);
-      delayMicroseconds(200);
-      digitalWrite(stepPinY1, LOW);
-      delayMicroseconds(200);
-      
-    }
-    if (digitalRead(limitSwitchY2) == HIGH) {
-      digitalWrite(stepPinY2, HIGH);
-      delayMicroseconds(200);
-      digitalWrite(stepPinY2, LOW);
-      delayMicroseconds(200);
+    if (!y2AtLimit) {
+      if (digitalRead(limitSwitchY2) == HIGH) {
+        digitalWrite(stepPinY2, HIGH);
+        delayMicroseconds(300);
+        digitalWrite(stepPinY2, LOW);
+        delayMicroseconds(300);
+      } else {
+        y2AtLimit = true;
+      }
     }
   }
 
-  // Double check
+  delay(100);
+  
   digitalWrite(dirPinY1, HIGH);
   digitalWrite(dirPinY2, HIGH);
 
-  for (int x = 0; x < 1000; x++) {
+  for (int x = 0; x < 500; x++) {
     digitalWrite(stepPinY1, HIGH);
     digitalWrite(stepPinY2, HIGH);
-    delayMicroseconds(300);
+    delayMicroseconds(500);
     digitalWrite(stepPinY1, LOW);
     digitalWrite(stepPinY2, LOW);
-    delayMicroseconds(300);
+    delayMicroseconds(500);
   }
+
   delay(100);
-  
+
   digitalWrite(dirPinY1, LOW);
   digitalWrite(dirPinY2, LOW);
 
-  while (digitalRead(limitSwitchY1) == HIGH || digitalRead(limitSwitchY2) == HIGH) {
-    if(EM_Button_Pressed)
-    {
-      return;
-    }
-    if (digitalRead(limitSwitchY1) == HIGH) {
-      digitalWrite(stepPinY1, HIGH);
-      delayMicroseconds(300);
-      digitalWrite(stepPinY1, LOW);
-      delayMicroseconds(300);
-    }
+  y1AtLimit = false;
+  y2AtLimit = false;
 
-    if (digitalRead(limitSwitchY2) == HIGH) {
-      digitalWrite(stepPinY2, HIGH);
-      delayMicroseconds(300);
-      digitalWrite(stepPinY2, LOW);
-      delayMicroseconds(300);
+  while (!y1AtLimit || !y2AtLimit) {
+    if (!y1AtLimit) {
+      if (digitalRead(limitSwitchY1) == HIGH) {
+        digitalWrite(stepPinY1, HIGH);
+        delayMicroseconds(500);
+        digitalWrite(stepPinY1, LOW);
+        delayMicroseconds(500);
+      } else {
+        y1AtLimit = true;
+      }
+    }
+    if (!y2AtLimit) {
+      if (digitalRead(limitSwitchY2) == HIGH) {
+        digitalWrite(stepPinY2, HIGH);
+        delayMicroseconds(500);
+        digitalWrite(stepPinY2, LOW);
+        delayMicroseconds(500);
+      } else {
+        y2AtLimit = true;
+      }
     }
   }
 
   Serial.println("Y1 and Y2 axes calibrated.");
 
-  long steps_to_move_y = 5 * (400 / 8);
+  long steps_to_move_y1 = 5 * (400 / 8); 
+  long steps_to_move_y2 = 5 * (400 / 8); 
 
   digitalWrite(dirPinY1, HIGH);
   digitalWrite(dirPinY2, HIGH);
 
-  for (long x = 0; x < abs(steps_to_move_y); x++) {
-    digitalWrite(stepPinY1, HIGH);
-    digitalWrite(stepPinY2, HIGH);
-    delayMicroseconds(300);
-    digitalWrite(stepPinY1, LOW);
-    digitalWrite(stepPinY2, LOW);
-    delayMicroseconds(300);
+  for (long x = 0; x < max(abs(steps_to_move_y1), abs(steps_to_move_y2)); x++) {
+    if (x < abs(steps_to_move_y1)) {
+      digitalWrite(stepPinY1, HIGH);
+      delayMicroseconds(300);
+      digitalWrite(stepPinY1, LOW);
+      delayMicroseconds(300);
+    }
+    if (x < abs(steps_to_move_y2)) {
+      digitalWrite(stepPinY2, HIGH);
+      delayMicroseconds(300);
+      digitalWrite(stepPinY2, LOW);
+      delayMicroseconds(300);
+    }
   }
 
-  Serial.println("Ok");
+  Serial.println("OK");
 }
+
 
 void CalibrateAll() {
   Serial.println("Running");

@@ -26,6 +26,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         # config interface
         self.IsMoving = 0
+        self.IsMoving_C = 0
         self.IsMoving_1 = 0
         self.displacement = [0,0]
         self.Zoffset = 0
@@ -42,8 +43,9 @@ class Ui_MainWindow(object):
         self.gcode_commands = []
         self.Z_Current_State = 0
         self.M_CurrentPos = [0, 0, 0]
-        self.Machine_Max_UpperLim = [205,190]
-        self.Machine_Max_LowerLim= [-205,-190]
+        self.Frame_CurrentPos = [0, 0]
+        self.Machine_Max_UpperLim = [300,300]
+        self.Machine_Max_LowerLim= [0,0]
         self.Current_X_Gcode = 0
         self.Current_Y_Gcode = 0
 
@@ -52,25 +54,27 @@ class Ui_MainWindow(object):
         self.MainWindow = MainWindow
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1029, 781)
+        MainWindow.setWindowIcon(QtGui.QIcon("icon.png"))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
+        MainWindow.setCentralWidget(self.centralwidget)   
         self.centralwidget.setObjectName("centralwidget")
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
         self.tabWidget.setGeometry(QtCore.QRect(0, 0, 1021, 741))
         self.tabWidget.setObjectName("tabWidget")
-        self.tab_2 = QtWidgets.QWidget()
-        self.tab_2.setObjectName("tab_2")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
-        self.COM_comboBox = QtWidgets.QComboBox(self.tab)
-        self.COM_comboBox.setGeometry(QtCore.QRect(140, 40, 83, 22))
-        self.COM_comboBox.setObjectName("COM_comboBox")
-        self.Baudrate_comboBox = QtWidgets.QComboBox(self.tab)
-        self.Baudrate_comboBox.setGeometry(QtCore.QRect(140, 70, 83, 22))
-        font = QtGui.QFont()
-        font.setPointSize(9)
-        self.Baudrate_comboBox.setFont(font)
-        self.Baudrate_comboBox.setObjectName("Baudrate_comboBox")
-        self.Baudrate_comboBox.addItem("")
+        self.tabWidget.addTab(self.tab, "") 
+        self.tab_2 = QtWidgets.QWidget()
+        self.tab_2.setObjectName("tab_2")
+        self.tabWidget.addTab(self.tab_2, "")
+        self.photo = QtWidgets.QLabel(self.tab)
+        self.photo.setGeometry(QtCore.QRect(920, 10, 80, 80))
+        self.photo.setText("")
+        self.photo.setPixmap(QtGui.QPixmap("logo.png"))
+        self.photo.setScaledContents(True)
+        self.photo.setObjectName("photo")
+
+        # Set label: 
         self.label = QtWidgets.QLabel(self.tab)
         self.label.setGeometry(QtCore.QRect(10, 10, 161, 21))
         font = QtGui.QFont()
@@ -94,6 +98,137 @@ class Ui_MainWindow(object):
         font.setPointSize(10)
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
+        self.label_4 = QtWidgets.QLabel(self.tab)
+        self.label_4.setGeometry(QtCore.QRect(280, 240, 71, 21))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_4.setFont(font)
+        self.label_4.setObjectName("label_4")
+        self.label_5 = QtWidgets.QLabel(self.tab)
+        self.label_5.setGeometry(QtCore.QRect(260, 10, 55, 21))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_5.setFont(font)
+        self.label_5.setObjectName("label_5")
+        self.label_6 = QtWidgets.QLabel(self.tab)
+        self.label_6.setGeometry(QtCore.QRect(260, 60, 30, 40))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(20)
+        self.label_6.setFont(font)
+        self.label_6.setObjectName("label_6")
+        self.label_7 = QtWidgets.QLabel(self.tab)
+        self.label_7.setGeometry(QtCore.QRect(260, 120, 30, 40))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(20)
+        self.label_7.setFont(font)
+        self.label_7.setObjectName("label_7")
+        self.label_8 = QtWidgets.QLabel(self.tab)
+        self.label_8.setGeometry(QtCore.QRect(260, 140, 30, 40))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(20)
+        self.label_8.setFont(font)
+        self.label_8.setObjectName("label_8")
+        self.label_9 = QtWidgets.QLabel(self.tab)
+        self.label_9.setGeometry(QtCore.QRect(10, 450, 55, 16))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_9.setFont(font)
+        self.label_9.setObjectName("label_9")
+        self.label_10 = QtWidgets.QLabel(self.tab)
+        self.label_10.setGeometry(QtCore.QRect(520, 30, 71, 21))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_10.setFont(font)
+        self.label_10.setObjectName("label_10")
+        self.label_11 = QtWidgets.QLabel(self.tab)
+        self.label_11.setGeometry(QtCore.QRect(10, 170, 111, 16))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_11.setFont(font)
+        self.label_11.setObjectName("label_11")
+        self.label_12 = QtWidgets.QLabel(self.tab)
+        self.label_12.setGeometry(QtCore.QRect(520, 150, 141, 21))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_12.setFont(font)
+        self.label_12.setObjectName("label_12")
+        self.label_13 = QtWidgets.QLabel(self.tab)
+        self.label_13.setGeometry(QtCore.QRect(730, 10, 191, 20))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_13.setFont(font)
+        self.label_13.setObjectName("label_13")
+        self.label_14 = QtWidgets.QLabel(self.tab)
+        self.label_14.setGeometry(QtCore.QRect(730, 35, 181, 16))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_14.setFont(font)
+        self.label_14.setObjectName("label_14")
+        self.label_15 = QtWidgets.QLabel(self.tab)
+        self.label_15.setGeometry(QtCore.QRect(810, 250, 51, 16))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_15.setFont(font)
+        self.label_15.setObjectName("label_15")
+        self.label_16 = QtWidgets.QLabel(self.tab_2)
+        self.label_16.setGeometry(QtCore.QRect(690, 360, 121, 16))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setUnderline(False)
+        font.setStrikeOut(False)
+        self.label_16.setFont(font)
+        self.label_16.setObjectName("label_16")
+        self.label_17 = QtWidgets.QLabel(self.tab_2)
+        self.label_17.setGeometry(QtCore.QRect(690, 60, 71, 16))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        self.label_17.setFont(font)
+        self.label_17.setObjectName("label_17")
+
+        self.COM_comboBox = QtWidgets.QComboBox(self.tab)
+        self.COM_comboBox.setGeometry(QtCore.QRect(140, 40, 83, 22))
+        self.COM_comboBox.setObjectName("COM_comboBox")
+        self.Baudrate_comboBox = QtWidgets.QComboBox(self.tab)
+        self.Baudrate_comboBox.setGeometry(QtCore.QRect(140, 70, 83, 22))
+        font = QtGui.QFont()
+        font.setPointSize(9)
+        self.Baudrate_comboBox.setFont(font)
+        self.Baudrate_comboBox.setObjectName("Baudrate_comboBox")
+        self.Baudrate_comboBox.addItem("")
         self.Refresh_pushButton = QtWidgets.QPushButton(self.tab)
         self.Refresh_pushButton.setGeometry(QtCore.QRect(20, 110, 93, 28))
         font = QtGui.QFont()
@@ -114,15 +249,6 @@ class Ui_MainWindow(object):
         self.tableView_2 = QtWidgets.QTableView(self.tab)
         self.tableView_2.setGeometry(QtCore.QRect(250, 5, 761, 426))
         self.tableView_2.setObjectName("tableView_2")
-        self.label_4 = QtWidgets.QLabel(self.tab)
-        self.label_4.setGeometry(QtCore.QRect(280, 240, 71, 21))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_4.setFont(font)
-        self.label_4.setObjectName("label_4")
         self.YPos_pushButton = QtWidgets.QPushButton(self.tab)
         self.YPos_pushButton.setGeometry(QtCore.QRect(500, 240, 70, 60))
         font = QtGui.QFont()
@@ -187,36 +313,6 @@ class Ui_MainWindow(object):
         self.line.setFrameShape(QtWidgets.QFrame.VLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line.setObjectName("line")
-        self.label_5 = QtWidgets.QLabel(self.tab)
-        self.label_5.setGeometry(QtCore.QRect(260, 10, 55, 21))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_5.setFont(font)
-        self.label_5.setObjectName("label_5")
-        self.label_6 = QtWidgets.QLabel(self.tab)
-        self.label_6.setGeometry(QtCore.QRect(260, 60, 30, 40))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(20)
-        self.label_6.setFont(font)
-        self.label_6.setObjectName("label_6")
-        self.label_7 = QtWidgets.QLabel(self.tab)
-        self.label_7.setGeometry(QtCore.QRect(260, 120, 30, 40))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(20)
-        self.label_7.setFont(font)
-        self.label_7.setObjectName("label_7")
-        self.label_8 = QtWidgets.QLabel(self.tab)
-        self.label_8.setGeometry(QtCore.QRect(260, 140, 30, 40))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(20)
-        self.label_8.setFont(font)
-        self.label_8.setObjectName("label_8")
         self.X_lineEdit = QtWidgets.QLineEdit(self.tab)
         self.X_lineEdit.setGeometry(QtCore.QRect(300, 70, 113, 22))
         font = QtGui.QFont()
@@ -265,15 +361,6 @@ class Ui_MainWindow(object):
         self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
         self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_2.setObjectName("line_2")
-        self.label_10 = QtWidgets.QLabel(self.tab)
-        self.label_10.setGeometry(QtCore.QRect(520, 30, 71, 21))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_10.setFont(font)
-        self.label_10.setObjectName("label_10")
         self.Gcode_textBrowser = QtWidgets.QTextBrowser(self.tab)
         self.Gcode_textBrowser.setGeometry(QtCore.QRect(520, 60, 291, 41))
         self.Gcode_textBrowser.setObjectName("Gcode_textBrowser")
@@ -294,24 +381,6 @@ class Ui_MainWindow(object):
         self.tableView_4 = QtWidgets.QTableView(self.tab)
         self.tableView_4.setGeometry(QtCore.QRect(5, 160, 241, 271))
         self.tableView_4.setObjectName("tableView_4")
-        self.label_11 = QtWidgets.QLabel(self.tab)
-        self.label_11.setGeometry(QtCore.QRect(10, 170, 111, 16))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_11.setFont(font)
-        self.label_11.setObjectName("label_11")
-        self.label_12 = QtWidgets.QLabel(self.tab)
-        self.label_12.setGeometry(QtCore.QRect(520, 150, 141, 21))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_12.setFont(font)
-        self.label_12.setObjectName("label_12")
         self.ManualCommand_lineEdit = QtWidgets.QLineEdit(self.tab)
         self.ManualCommand_lineEdit.setGeometry(QtCore.QRect(520, 180, 191, 31))
         self.ManualCommand_lineEdit.setObjectName("ManualCommand_lineEdit")
@@ -341,15 +410,6 @@ class Ui_MainWindow(object):
         self.All_Calibrate_pushButton = QtWidgets.QPushButton(self.tab)
         self.All_Calibrate_pushButton.setGeometry(QtCore.QRect(70, 300, 93, 28))
         self.All_Calibrate_pushButton.setObjectName("All_Calibrate_pushButton")
-        self.label_9 = QtWidgets.QLabel(self.tab)
-        self.label_9.setGeometry(QtCore.QRect(10, 450, 55, 16))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_9.setFont(font)
-        self.label_9.setObjectName("label_9")
         self.Status_textBrowser = QtWidgets.QTextBrowser(self.tab)
         self.Status_textBrowser.setGeometry(QtCore.QRect(14, 480, 991, 211))
         self.Status_textBrowser.setObjectName("Status_textBrowser")
@@ -363,39 +423,6 @@ class Ui_MainWindow(object):
         self.Command_textBrowser = QtWidgets.QTextBrowser(self.tab_2)
         self.Command_textBrowser.setGeometry(QtCore.QRect(690, 330, 301, 341))
         self.Command_textBrowser.setObjectName("Command_textBrowser")
-        self.label_13 = QtWidgets.QLabel(self.tab)
-        self.label_13.setGeometry(QtCore.QRect(720, 10, 191, 20))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_13.setFont(font)
-        self.label_13.setObjectName("label_13")
-        self.label_14 = QtWidgets.QLabel(self.tab)
-        self.label_14.setGeometry(QtCore.QRect(720, 35, 181, 16))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_14.setFont(font)
-        self.label_14.setObjectName("label_14")
-        self.photo = QtWidgets.QLabel(self.tab)
-        self.photo.setGeometry(QtCore.QRect(930, 20, 61, 61))
-        self.photo.setText("")
-        self.photo.setPixmap(QtGui.QPixmap("logo.png"))
-        self.photo.setScaledContents(True)
-        self.photo.setObjectName("photo")
-        self.label_15 = QtWidgets.QLabel(self.tab)
-        self.label_15.setGeometry(QtCore.QRect(810, 250, 51, 16))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_15.setFont(font)
-        self.label_15.setObjectName("label_15")
         self.line_3 = QtWidgets.QFrame(self.tab)
         self.line_3.setGeometry(QtCore.QRect(700, 240, 20, 181))
         self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
@@ -408,6 +435,15 @@ class Ui_MainWindow(object):
         font.setPointSize(10)
         self.label_18.setFont(font)
         self.label_18.setObjectName("label_18")
+        self.label_19 = QtWidgets.QLabel(self.tab)
+        self.label_19.setGeometry(QtCore.QRect(520, 10, 200, 20))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_19.setFont(font)
+        self.label_19.setObjectName("label_19")
         self.ZOffset_lineEdit = QtWidgets.QLineEdit(self.tab)
         self.ZOffset_lineEdit.setGeometry(QtCore.QRect(788, 277, 61, 22))
         font = QtGui.QFont()
@@ -586,6 +622,7 @@ class Ui_MainWindow(object):
         self.label_15.raise_()
         self.line_3.raise_()
         self.label_18.raise_()
+        self.label_19.raise_()
         self.ZOffset_lineEdit.raise_()
         self.Save_pushButton.raise_()
         self.ZPos_pushButton.raise_()
@@ -601,9 +638,6 @@ class Ui_MainWindow(object):
         self.label_25.raise_()
         self.label_26.raise_()
         self.SetHome_pushButton.raise_()
-        self.tabWidget.addTab(self.tab, "")     
-        self.tab_2 = QtWidgets.QWidget()
-        self.tab_2.setObjectName("tab_2")
         self.tableView_3 = QtWidgets.QTableView(self.tab_2)
         self.tableView_3.setGeometry(QtCore.QRect(5, 10, 1001, 691))
         self.tableView_3.setObjectName("tableView_3")
@@ -635,16 +669,6 @@ class Ui_MainWindow(object):
         self.Command_textBrowser = QtWidgets.QTextBrowser(self.tab_2)
         self.Command_textBrowser.setGeometry(QtCore.QRect(690, 390, 301, 281))
         self.Command_textBrowser.setObjectName("Command_textBrowser")
-        self.label_16 = QtWidgets.QLabel(self.tab_2)
-        self.label_16.setGeometry(QtCore.QRect(690, 360, 121, 16))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setUnderline(False)
-        font.setStrikeOut(False)
-        self.label_16.setFont(font)
-        self.label_16.setObjectName("label_16")
         self.ClearMessage_pushButton_2 = QtWidgets.QPushButton(self.tab_2)
         self.ClearMessage_pushButton_2.setGeometry(QtCore.QRect(870, 70, 121, 28))
         font = QtGui.QFont()
@@ -652,14 +676,6 @@ class Ui_MainWindow(object):
         font.setPointSize(9)
         self.ClearMessage_pushButton_2.setFont(font)
         self.ClearMessage_pushButton_2.setObjectName("ClearMessage_pushButton_2")
-        self.label_17 = QtWidgets.QLabel(self.tab_2)
-        self.label_17.setGeometry(QtCore.QRect(690, 60, 71, 16))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(10)
-        font.setBold(True)
-        self.label_17.setFont(font)
-        self.label_17.setObjectName("label_17")
         self.listView_2 = QtWidgets.QListView(self.tab_2)
         self.listView_2.setGeometry(QtCore.QRect(680, 50, 321, 291))
         self.listView_2.setObjectName("listView_2")
@@ -677,17 +693,11 @@ class Ui_MainWindow(object):
         self.label_16.raise_()
         self.label_17.raise_()
         self.Frame_pushButton.raise_()
-        self.tabWidget.addTab(self.tab_2, "")
-        MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1029, 26))
         self.menubar.setObjectName("menubar")
         self.menuFILE = QtWidgets.QMenu(self.menubar)
         self.menuFILE.setObjectName("menuFILE")
-        self.menuTools = QtWidgets.QMenu(self.menubar)
-        self.menuTools.setObjectName("menuTools")
-        self.menuHelp = QtWidgets.QMenu(self.menubar)
-        self.menuHelp.setObjectName("menuHelp")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -698,10 +708,7 @@ class Ui_MainWindow(object):
         self.actionSettings = QtWidgets.QAction(MainWindow)
         self.actionSettings.setObjectName("actionSettings")
         self.menuFILE.addAction(self.actionExit)
-        self.menuTools.addAction(self.actionSettings)
         self.menubar.addAction(self.menuFILE.menuAction())
-        self.menubar.addAction(self.menuTools.menuAction())
-        self.menubar.addAction(self.menuHelp.menuAction())
         
 
         self.retranslateUi(MainWindow)
@@ -715,6 +722,7 @@ class Ui_MainWindow(object):
         self.Delete_pushButton.clicked.connect(self.unload_file)
         self.Move_pushButton.clicked.connect(self.move_command)
         self.ClearMessage_pushButton.clicked.connect(self.clear_messages)
+        self.ClearMessage_pushButton_2.clicked.connect(self.clear_messages_2)
         self.XPos_pushButton.clicked.connect(self.move_X_positive)
         self.XNeg_pushButton.clicked.connect(self.move_X_negative)
         self.YPos_pushButton.clicked.connect(self.move_Y_positive)
@@ -751,9 +759,30 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Serial Configuration"))
         self.label_2.setText(_translate("MainWindow", "COM:"))
         self.label_3.setText(_translate("MainWindow", "Baudrate:"))
+        self.label_4.setText(_translate("MainWindow", "Jogging"))
+        self.label_5.setText(_translate("MainWindow", "Work"))
+        self.label_6.setText(_translate("MainWindow", "X"))
+        self.label_7.setText(_translate("MainWindow", "Y"))
+        self.label_9.setText(_translate("MainWindow", "Status"))
+        self.label_10.setText(_translate("MainWindow", "G-Code"))
+        self.label_11.setText(_translate("MainWindow", "Basic control"))
+        self.label_12.setText(_translate("MainWindow", "Manual Command"))
+        self.label_13.setText(_translate("MainWindow", "By Nguyen Hoang Khang "))
+        self.label_14.setText(_translate("MainWindow", "EEACIU19015 - HCMIU"))
+        self.label_15.setText(_translate("MainWindow", "Offset"))
+        self.label_16.setText(_translate("MainWindow", "List Command"))
+        self.label_17.setText(_translate("MainWindow", "Status 2"))
+        self.label_18.setText(_translate("MainWindow", "Z Offset:"))
+        self.label_19.setText(_translate("MainWindow", "Advisor: Dr. Ton That Long"))
+        self.label_20.setText(_translate("MainWindow", "Speed:"))
+        self.label_21.setText(_translate("MainWindow", "Acceleration:"))
+        self.label_22.setText(_translate("MainWindow", "100, 100, 50"))
+        self.label_23.setText(_translate("MainWindow", "200, 200"))
+        self.label_24.setText(_translate("MainWindow", "IncVal:"))
+        self.label_25.setText(_translate("MainWindow", "mm"))
+        self.label_26.setText(_translate("MainWindow", "mm"))
         self.Refresh_pushButton.setText(_translate("MainWindow", "Refresh"))
         self.Connect_pushButton.setText(_translate("MainWindow", "Connect"))
-        self.label_4.setText(_translate("MainWindow", "Jogging"))
         self.YPos_pushButton.setText(_translate("MainWindow", "Y +"))
         self.YNeg_pushButton.setText(_translate("MainWindow", "Y -"))
         self.XNeg_pushButton.setText(_translate("MainWindow", "X -"))
@@ -763,9 +792,6 @@ class Ui_MainWindow(object):
         self.Ten_radioButton.setText(_translate("MainWindow", "10"))
         self.One_radioButton.setText(_translate("MainWindow", "1"))
         self.DotOne_radioButton.setText(_translate("MainWindow", "0.1"))
-        self.label_5.setText(_translate("MainWindow", "Work"))
-        self.label_6.setText(_translate("MainWindow", "X"))
-        self.label_7.setText(_translate("MainWindow", "Y"))
         self.X_lineEdit.setText(_translate("MainWindow", "0.000"))
         self.Y_lineEdit.setText(_translate("MainWindow", "0.000"))
         self.XHome_pushButton.setText(_translate("MainWindow", "Set 0"))
@@ -774,46 +800,26 @@ class Ui_MainWindow(object):
         self.YHome_pushButton.clicked.connect(self.Y_Home)
         self.AllHome_pushButton.setText(_translate("MainWindow", "Home All"))
         self.AllHome_pushButton.clicked.connect(self.Home_All)
-        self.label_10.setText(_translate("MainWindow", "G-Code"))
         self.Load_pushButton.setText(_translate("MainWindow", "Load"))
         self.Delete_pushButton.setText(_translate("MainWindow", "Delete"))
-        self.label_11.setText(_translate("MainWindow", "Basic control"))
-        self.label_12.setText(_translate("MainWindow", "Manual Command"))
         self.Send_pushButton.setText(_translate("MainWindow", "Send"))
         self.X_Calibrate_pushButton.setText(_translate("MainWindow", "X Calibrate"))
         self.Y_Calibrate_pushButton.setText(_translate("MainWindow", "Y Calibrate"))
         self.Move_pushButton.setText(_translate("MainWindow", "Move"))
         self.All_Calibrate_pushButton.setText(_translate("MainWindow", "Calibrate All"))
-        self.label_9.setText(_translate("MainWindow", "Status"))
         self.ClearMessage_pushButton.setText(_translate("MainWindow", "Clear Message"))
-        self.label_13.setText(_translate("MainWindow", "By Nguyen Hoang Khang "))
-        self.label_14.setText(_translate("MainWindow", "EEACIU19015 - HCMIU"))
-        self.label_15.setText(_translate("MainWindow", "Offset"))
-        self.label_16.setText(_translate("MainWindow", "List Command"))
-        self.label_18.setText(_translate("MainWindow", "Z Offset:"))
         self.Save_pushButton.setText(_translate("MainWindow", "Save"))
         self.ZPos_pushButton.setText(_translate("MainWindow", "Z +"))
         self.ZNeg_pushButton.setText(_translate("MainWindow", "Z -"))
         self.ZOffset_lineEdit.setText(_translate("MainWindow", "0.0"))
         self.Z_lineEdit.setText(_translate("MainWindow", "0.0"))
-        self.label_20.setText(_translate("MainWindow", "Speed:"))
-        self.label_21.setText(_translate("MainWindow", "Acceleration:"))
-        self.label_22.setText(_translate("MainWindow", "100, 100, 50"))
-        self.label_23.setText(_translate("MainWindow", "200, 200"))
-        self.label_24.setText(_translate("MainWindow", "IncVal:"))
-        self.label_25.setText(_translate("MainWindow", "mm"))
-        self.label_26.setText(_translate("MainWindow", "mm"))
         self.SetHome_pushButton.setText(_translate("MainWindow", "Set Home"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Interface"))
         self.Start_pushButton.setText(_translate("MainWindow", "Start"))
         self.Frame_pushButton.setText(_translate("MainWindow", "Frame"))
-        self.label_16.setText(_translate("MainWindow", "List command"))
         self.ClearMessage_pushButton_2.setText(_translate("MainWindow", "Clear Message"))
-        self.label_17.setText(_translate("MainWindow", "Status 2"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "G Code "))
         self.menuFILE.setTitle(_translate("MainWindow", "File"))
-        self.menuTools.setTitle(_translate("MainWindow", "Tools"))
-        self.menuHelp.setTitle(_translate("MainWindow", "Help"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionExit.setShortcut(_translate("MainWindow", "Ctrl+S"))
         self.actionExit.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_S))
@@ -872,6 +878,10 @@ class Ui_MainWindow(object):
     def clear_messages(self):
         # Clear the content of the SystemM_textBrowser
         self.Status_textBrowser.clear()
+    
+    def clear_messages_2(self):
+        # Clear the content of the SystemM_textBrowser
+        self.Status_textBrowser_2.clear()
 
     def read_from_serial_port(self):
         try:
@@ -894,21 +904,26 @@ class Ui_MainWindow(object):
                     self.IsMoving = 0
             elif data is not None and data.strip() == 'Ok' and self.IsMoving_1 == 1:  # Check if 'Ok' message is received
                     self.Enable_Function()
-                    self.IsMoving_1 = 1
+                    self.IsMoving_1 = 0
             elif data is not None and data.strip() == 'Ok' and self.Is_Move_Frame == 1:  # Check if 'Ok' message is received
                 if self.edge_index < len(self.rect_coords):
                     print("Send " + str(self.edge_index)+ "line")
                     self.draw_next_edge()
-
                 else:
                     self.Is_Move_Frame = 0
                     self.Enable_Function()
                     self.remove_frame()
-                    
-
-            if data is not None and data.strip() == 'EB':
+            elif data is not None and data.strip() == 'Ok' and self.IsMoving_C == 1:  # Check if 'Ok' message is received
+                current_time = datetime.now().strftime('%H:%M:%S')
+                self.Status_textBrowser.append(f"[{current_time}] Calibrate Done")
+            elif data is not None and data.strip() == 'EB':
+                self.Is_Move_Frame = 0
+                self.IsMoving = 0
+                self.IsMoving_1 = 0
+                self.Enable_Function()
                 current_time = datetime.now().strftime('%H:%M:%S')
                 self.Status_textBrowser.append(f"[{current_time}] ALLERT !!! EMERGENCY BUTTON PRESSED !!!")
+
 
 
     def start_processing(self):
@@ -916,14 +931,14 @@ class Ui_MainWindow(object):
             self.IsMoving = 1
             if len(self.gcode_commands) == 0:
                 current_time = datetime.now().strftime('%H:%M:%S')
-                self.Status_textBrowser.append(f"[{current_time}] No G-code commands loaded")
+                self.Status_textBrowser_2.append(f"[{current_time}] No G-code commands loaded")
                 return
             self.current_command_index  = 0
             self.process_next_command()
             self.Disable_Function()
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
-            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
+            self.Status_textBrowser_2.append(f"[{current_time}] Arduino not connected")
 
     def extract_coordinates(self, command):
         # Define start and end position of X and Y in list G-code
@@ -983,7 +998,7 @@ class Ui_MainWindow(object):
 
                 gcode_send = "G0X{:0=+}Y{:0=+}Z{:0=+}".format(steps[0], steps[1], (ZtoMove))
                 self.send_to_arduino(gcode_send)
-                self.display_gcode(gcode_send)
+                self.display_gcode_2(gcode_send)
                 # Simulate movement by updating plot position
                 x = steps[0]
                 y = steps[1]
@@ -997,7 +1012,7 @@ class Ui_MainWindow(object):
 
                 gcode_send = "G0X{:0=+}Y{:0=+}Z{:0=+}".format(steps[0], steps[1], (ZtoMove))
                 self.send_to_arduino(gcode_send)
-                self.display_gcode(gcode_send)
+                self.display_gcode_2(gcode_send)
                 # Simulate movement by updating plot position
                 x = steps[0]
                 y = steps[1]
@@ -1007,9 +1022,16 @@ class Ui_MainWindow(object):
                 self.update_current_position()
                 
     def Set_Home(self):
-        print([self.M_CurrentPos[0],self.M_CurrentPos[1]])
-        self.displacement[0] = self.M_CurrentPos[0]
-        self.displacement[1] = self.M_CurrentPos[1]
+        if self.Connect_pushButton.text() == "Disconnect":
+            print([self.M_CurrentPos[0],self.M_CurrentPos[1]])
+            self.displacement[0] = self.M_CurrentPos[0]
+            self.displacement[1] = self.M_CurrentPos[1]
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Home set at X = {self.displacement[0]} mm and Y = {self.displacement[1]} mm")
+        else:
+            # Inform user if Arduino is not connected
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
 
     def convert_command_to_steps_1(self, command):
         x_coord_v = self.get_coord_value(command, 'X', self.M_CurrentPos[0])
@@ -1024,9 +1046,10 @@ class Ui_MainWindow(object):
         y_ToMove = y_coord_v + self.displacement[1]  - self.M_CurrentPos[1]
 
 
-        # Cập nhật vị trí gốc mới    
+        # Update new current position   
         self.M_CurrentPos[0] = x_coord_v + self.displacement[0]
         self.M_CurrentPos[1] = y_coord_v + self.displacement[1]
+
         # Set lineEdits for current position
         self.X_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[0]))
         self.Y_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[1]))
@@ -1233,7 +1256,7 @@ class Ui_MainWindow(object):
         # Limit coordinate value
         x_coord_v = min(max(x_coord_v, self.Machine_Max_LowerLim[0]), self.Machine_Max_UpperLim[0])
         y_coord_v = min(max(y_coord_v, self.Machine_Max_LowerLim[1]), self.Machine_Max_UpperLim[1])
-
+        print(x_coord_v)
         # Calculate steps to move
         x_ToMove = x_coord_v - self.M_CurrentPos[0]
         y_ToMove = y_coord_v - self.M_CurrentPos[1]
@@ -1280,27 +1303,35 @@ class Ui_MainWindow(object):
 
     def calibrate_X(self):
         if self.Connect_pushButton.text() == "Disconnect":
-            self.IsMoving = 1
+            self.IsMoving_C = 1
             self.send_to_arduino('CX')
             self.Status_textBrowser.append(datetime.now().strftime("[%H:%M:%S]: ") + "Calibrating X axis...")
+            self.M_CurrentPos[0] = 0.00
+            self.X_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[0]))
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
 
     def calibrate_Y(self):
         if self.Connect_pushButton.text() == "Disconnect":
-            self.IsMoving = 1
+            self.IsMoving_C = 1
             self.send_to_arduino('CY')
             self.Status_textBrowser.append(datetime.now().strftime("[%H:%M:%S]: ") + "Calibrating Y axis...")
+            self.M_CurrentPos[1] = 0.00
+            self.X_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[1]))
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
 
     def calibrate_All(self):
         if self.Connect_pushButton.text() == "Disconnect":
-            self.IsMoving = 1
+            self.IsMoving_C = 1
             self.send_to_arduino('CA')
             self.Status_textBrowser.append(datetime.now().strftime("[%H:%M:%S]: ") + "Calibrating All axis...")
+            self.M_CurrentPos[0] = 0.00
+            self.M_CurrentPos[1] = 0.00
+            self.X_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[0]))
+            self.X_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[1]))
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
@@ -1309,16 +1340,13 @@ class Ui_MainWindow(object):
         if self.Connect_pushButton.text() == "Disconnect":
             self.IsMoving_1 = 1
             x_coord_v = 0.000 
-            y_coord_v = self.M_CurrentPos[1]
 
-            x_ToMove = x_coord_v - self.M_CurrentPos[0]
-            y_ToMove = y_coord_v - self.M_CurrentPos[1]
+            x_ToMove = x_coord_v - self.M_CurrentPos[0]            
 
             self.M_CurrentPos[0] = x_coord_v
-            self.M_CurrentPos[1] = y_coord_v
 
             # Generate the G-code command
-            steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, 0.0)
+            steps = self.calculate_steps_to_move(x_ToMove, 0.0, 0.0)
             gcode_send = "G0X{:0=+}".format(steps[0])
             gcode_display = "G0X{:0=+}".format(steps[0])
             # Send the G-code to Arduino 
@@ -1326,7 +1354,6 @@ class Ui_MainWindow(object):
             self.display_gcode(gcode_display)
             # Set line edit for current pos
             self.X_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[0]))
-            self.Y_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[1]))
             self.Disable_Function()
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
@@ -1335,24 +1362,21 @@ class Ui_MainWindow(object):
     def Y_Home(self):
         if self.Connect_pushButton.text() == "Disconnect":
             self.IsMoving_1 = 1
-            x_coord_v = self.M_CurrentPos[0]
+
             y_coord_v = 0.000
 
-            x_ToMove = x_coord_v - self.M_CurrentPos[0]
             y_ToMove = y_coord_v - self.M_CurrentPos[1]
 
-            self.M_CurrentPos[0] = x_coord_v
             self.M_CurrentPos[1] = y_coord_v
 
             # Generate the G-code command
-            steps = self.calculate_steps_to_move(x_ToMove, y_ToMove, 0.0)
+            steps = self.calculate_steps_to_move(0.0, y_ToMove, 0.0)
             gcode_send = "G0Y{:0=+}".format(steps[1])
             gcode_display = "G0Y{:0=+}".format(steps[1])
             # Send the G-code to Arduino 
             self.send_to_arduino(gcode_send)
             self.display_gcode(gcode_display)
             # Set line edit for current pos
-            self.X_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[0]))
             self.Y_lineEdit.setText("{:.3f}".format(self.M_CurrentPos[1]))
             self.Disable_Function()
         else:
@@ -1413,8 +1437,8 @@ class Ui_MainWindow(object):
                     self.M_CurrentPos[0] = self.M_CurrentPos[0] + VAL
 
                 self.X_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[0])))
-                gcode_send = "G0X{:0=+06.1f}".format(VAL*(400/8))
-                gcode_display = "G0X{:0=+06.1f}".format(VAL)
+                gcode_send = "G0X{:0=+}".format(VAL*(400/8))
+                gcode_display = "G0X{:0=+}".format(VAL)
                 self.send_to_arduino(gcode_send)
                 self.display_gcode(gcode_display)
                 self.Disable_Function()
@@ -1488,8 +1512,8 @@ class Ui_MainWindow(object):
                     self.M_CurrentPos[1] = self.M_CurrentPos[1] + VAL
 
                 self.Y_lineEdit.setText("{:.1f}".format(float(self.M_CurrentPos[1])))
-                gcode_send = "G0Y{:0=+06.1f}".format(VAL*(400/8))
-                gcode_display = "G0Y{:0=+06.1f}".format(VAL)
+                gcode_send = "G0Y{:0=+}".format(VAL*(400/8))
+                gcode_display = "G0Y{:0=+}".format(VAL)
                 self.send_to_arduino(gcode_send)
                 self.display_gcode(gcode_display)
                 self.Disable_Function()
@@ -1720,32 +1744,33 @@ class Ui_MainWindow(object):
                 widget.deleteLater()
     
     def frame(self):
-        if not self.x_coords or not self.y_coords:
-            return
+        if self.Connect_pushButton.text() == "Disconnect":
+            if not self.x_coords or not self.y_coords:
+                return
 
-        self.rect_lines = []
+            self.rect_lines = []
 
-        x_min, x_max = min(self.x_coords), max(self.x_coords)
-        y_min, y_max = min(self.y_coords), max(self.y_coords)
-      
+            x_min, x_max = min(self.x_coords), max(self.x_coords)
+            y_min, y_max = min(self.y_coords), max(self.y_coords)
 
-        # Coordinates of the rectangle edges
-        self.rect_coords = [
-            ((x_min, y_min), (x_min, y_max)),   # Left edge
-            ((x_min, y_max), (x_max, y_max)),   # Top edge
-            ((x_max, y_max), (x_max, y_min)),   # Right edge
-            ((x_max, y_min), (x_min, y_min))    # Bottom edge
-        ]
-        for i in  self.rect_coords:
-            print("line", i)
-        # Start drawing the rectangle edges one by one
-        self.edge_index = 0
-        self.timer = QTimer()
-        self.Is_Move_Frame = 1
-        self.draw_next_edge()
-        self.Disable_Function()
-        #self.timer.timeout.connect(self.draw_next_edge)
-        #self.timer.start(500)  # Draw each edge every second
+            # Coordinates of the rectangle edges
+            self.rect_coords = [
+                ((x_min, y_min), (x_min, y_max)),   # Left edge
+                ((x_min, y_max), (x_max, y_max)),   # Top edge
+                ((x_max, y_max), (x_max, y_min)),   # Right edge
+                ((x_max, y_min), (x_min, y_min))    # Bottom edge
+            ]
+            for i in  self.rect_coords:
+                print("line", i)
+            # Start drawing the rectangle edges one by one
+            self.edge_index = 0
+            self.timer = QTimer()
+            self.Is_Move_Frame = 1
+            self.draw_next_edge()
+            self.Disable_Function()
+        else:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.Status_textBrowser_2.append(f"[{current_time}] Arduino not connected")
 
     def draw_next_edge(self):
         if self.Connect_pushButton.text() == "Disconnect":
@@ -1757,18 +1782,19 @@ class Ui_MainWindow(object):
             self.fig.canvas.draw_idle()
             self.edge_index += 1
             steps = self.calculate_steps_to_move(end[0], end[1], 0.0)
-            gcode_send = "G0X{:0=+}Y{:0=+}".format(steps[0] + self.displacement[0] - self.M_CurrentPos[0], steps[1] + self.displacement[1] - self.M_CurrentPos[1])
-            self.M_CurrentPos[0] = steps[0]
-            self.M_CurrentPos[1] = steps[1]
-            gcode_display = "G0X{:0=+}Y{:0=+}".format(steps[0], steps[1])
+            gcode_send = "G0X{:0=+}Y{:0=+}".format(steps[0] + self.displacement[0] - self.Frame_CurrentPos[0], steps[1] + self.displacement[1] - self.Frame_CurrentPos[1])
+            self.Frame_CurrentPos[0] = steps[0]
+            self.Frame_CurrentPos[1] = steps[1]
+            gcode_display = "G0X{:0=+}Y{:0=+}".format(steps[0] + self.displacement[0] - self.Frame_CurrentPos[0], steps[1] + self.displacement[1] - self.Frame_CurrentPos[1])
             # Send the G-code to Arduino 
             self.send_to_arduino(gcode_send)
-            self.display_gcode_2(gcode_display)
+            self.display_gcode_2(gcode_display)s
+
             self.Disable_Function()
         else:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.Status_textBrowser.append(f"[{current_time}] Arduino not connected")
-            # tao bien current position moi(chi de plot thoi)
+
     def remove_frame(self):
         for line in self.rect_lines:
             line.remove()
